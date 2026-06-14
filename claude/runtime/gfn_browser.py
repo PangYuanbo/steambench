@@ -478,15 +478,32 @@ def _play(agent_kind: str, url: str, steps: int) -> int:
     else:
         agent = ScriptedGamepadAgent([(20, GamepadAction.press("A")), (40, {"lx": 1.0}), (40, "DPAD_UP")])
 
-    print(f"▶ Opening GeForce NOW ({url}) in real Chrome — log into NVIDIA + start a game, then the")
-    print(f"  agent drives the virtual gamepad. agent={agent_kind}, up to {steps} steps.\n")
+    print(f"▶ Opening GeForce NOW ({url}) in real Chrome. Log into NVIDIA + launch a game in the")
+    print(f"  window; the agent starts driving automatically once the stream is live. agent={agent_kind}.\n")
     session.start()
     if hasattr(agent, "reset"):
         agent.reset()
-    try:
-        input("  Press Enter once your game is streaming to begin driving the gamepad… ")
-    except EOFError:
-        pass
+
+    page = session._page
+    # Auto-detect a live stream: a <video> that's actually playing with real
+    # dimensions. Waits while you navigate NVIDIA's menus + start the game.
+    print("  waiting for a game stream… (log in + start a game in the Chrome window)")
+    streaming = False
+    for _ in range(600):   # up to ~10 min
+        try:
+            v = page.evaluate(
+                "(() => { const v = document.querySelector('video'); "
+                "return (v && v.readyState >= 2 && v.videoWidth > 0) ? [v.videoWidth, v.videoHeight] : null; })()"
+            )
+        except Exception:
+            v = None
+        if v:
+            print(f"  ✓ stream live ({v[0]}x{v[1]}) — driving the gamepad.\n")
+            streaming = True
+            break
+        time.sleep(1)
+    if not streaming:
+        print("  (no stream detected after the wait — driving anyway; frames may be the GFN UI.)\n")
 
     from steambench_harness.protocol import Observation
     import base64
@@ -500,6 +517,15 @@ def _play(agent_kind: str, url: str, steps: int) -> int:
         session.apply(ga)
         reason = getattr(agent, "last_reasoning", "")
         print(f"  t{t:>4} pad={str(ga):<34} {reason}")
+        # stop early if the stream ends (back to a menu / disconnect)
+        if streaming and t % 20 == 19:
+            try:
+                alive = page.evaluate("(() => { const v = document.querySelector('video'); return !!(v && v.videoWidth > 0); })()")
+            except Exception:
+                alive = True
+            if not alive:
+                print("  stream ended — stopping.")
+                break
         time.sleep(0.1)
     session.close()
     return 0
