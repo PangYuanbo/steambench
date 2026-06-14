@@ -126,6 +126,21 @@ def action_to_state(ga: GamepadAction) -> tuple[list[float], list[float]]:
     return axes, buttons
 
 
+def _is_black(png: bytes, thresh: float = 8.0) -> bool:
+    """True if a PNG is (near) all black — the GPU-overlay readback signature
+    that means in-page capture failed and we should use OS screen capture."""
+    try:
+        import io
+
+        from PIL import Image
+
+        img = Image.open(io.BytesIO(png)).convert("L").resize((32, 32))
+        px = list(img.getdata())
+        return (sum(px) / len(px)) < thresh if px else False
+    except Exception:
+        return False
+
+
 class BrowserGamepadSession(GameSession):
     """A :class:`GameSession` that drives a browser game (GeForce NOW) via a
     virtual gamepad injected with Playwright. Frames are captured from the page;
@@ -140,6 +155,8 @@ class BrowserGamepadSession(GameSession):
         user_data_dir: Optional[str] = None,
         headless: bool = False,
         frame_size: Optional[tuple[int, int]] = None,
+        frame_source: str = "auto",   # "auto" | "page" | "screen"
+        capture_region: Optional[tuple[int, int, int, int]] = None,  # (x,y,w,h) for screen capture
         steam_key: Optional[str] = None,
         steamid: Optional[str] = None,
     ) -> None:
@@ -148,11 +165,14 @@ class BrowserGamepadSession(GameSession):
         self.user_data_dir = user_data_dir or str(ROOT / ".gfn-profile")
         self.headless = headless
         self.frame_size = frame_size
+        self.frame_source = frame_source
+        self.capture_region = capture_region
         self.steam_key = steam_key
         self.steamid = steamid
         self._pw = None
         self._ctx = None
         self._page = None
+        self._use_screen = (frame_source == "screen")  # auto flips this on black frames
 
     # ---- lifecycle -------------------------------------------------------- #
 
@@ -211,32 +231,60 @@ class BrowserGamepadSession(GameSession):
     def frame(self) -> bytes:
         if self._page is None:
             return b""
+        # OS screen capture (robust for the live GFN stream — reads the composited
+        # display, immune to the GPU-overlay black-frame trap).
+        if self._use_screen:
+            return self._resize(self._screen_capture())
+        # In-page capture: clip to the streamed <video> (GFN renders WebRTC there).
         try:
-            # Clip to the streamed <video> if present (GFN renders WebRTC there);
-            # otherwise grab the page. NOTE: on a live GFN stream the GPU overlay
-            # can read back black — if so, switch to OS window capture (see
-            # runtime/geforce_now.py's mss path). Works for non-overlay pages.
             box = self._page.evaluate(
                 "(() => { const v = document.querySelector('video'); if (!v) return null; "
                 "const r = v.getBoundingClientRect(); return {x:r.x, y:r.y, width:r.width, height:r.height}; })()"
             )
-            if box and box["width"] > 4 and box["height"] > 4:
-                png = self._page.screenshot(clip=box)
-            else:
-                png = self._page.screenshot()
+            png = self._page.screenshot(clip=box) if (box and box["width"] > 4 and box["height"] > 4) else self._page.screenshot()
+        except Exception:
+            png = b""
+        # auto: if the in-page frame is black (GPU overlay), switch to OS capture.
+        if self.frame_source == "auto" and png and _is_black(png):
+            self._use_screen = True
+            return self._resize(self._screen_capture())
+        return self._resize(png)
+
+    def _screen_capture(self) -> bytes:
+        """Capture the headed Chrome via the macOS `screencapture` CLI. Full main
+        display by default (play GFN fullscreen), or a configured (x,y,w,h)
+        region. Needs Screen-Recording permission granted once."""
+        import os
+        import subprocess
+        import tempfile
+
+        out = os.path.join(tempfile.gettempdir(), "sb_gfn_frame.png")
+        cmd = ["screencapture", "-x", "-t", "png"]
+        if self.capture_region:
+            x, y, w, h = self.capture_region
+            cmd.append(f"-R{x},{y},{w},{h}")
+        cmd.append(out)
+        try:
+            subprocess.run(cmd, check=False, timeout=10,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            with open(out, "rb") as f:
+                return f.read()
         except Exception:
             return b""
-        if self.frame_size:
-            try:
-                import io
 
-                from PIL import Image
+    def _resize(self, png: bytes) -> bytes:
+        if not png or not self.frame_size:
+            return png
+        try:
+            import io
 
-                img = Image.open(io.BytesIO(png)).convert("RGB").resize(self.frame_size)
-                buf = io.BytesIO(); img.save(buf, format="PNG"); png = buf.getvalue()
-            except Exception:
-                pass
-        return png
+            from PIL import Image
+
+            img = Image.open(io.BytesIO(png)).convert("RGB").resize(self.frame_size)
+            buf = io.BytesIO(); img.save(buf, format="PNG")
+            return buf.getvalue()
+        except Exception:
+            return png
 
     def achievements(self) -> set[str]:
         # Real GFN runs verify via the Steam Web API (see runtime/geforce_now.py
