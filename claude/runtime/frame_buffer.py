@@ -235,6 +235,95 @@ def open_game(game_id: str, seed: int = 1, **kw) -> DualRateBuffer:
     return DualRateBuffer(GameSource(game_id, seed), **kw).start()
 
 
+def drive_in_background(buf: DualRateBuffer, hz: int = 30) -> threading.Thread:
+    """Run the game's CV agent off the video buffer at `hz`, in a daemon thread —
+    so an opened game window is actually being *played* while you watch."""
+    agent = buf.source.make_agent()
+
+    def loop():
+        period = 1.0 / hz
+        while True:
+            f = buf.latest_video()
+            if f is not None:
+                try:
+                    buf.set_action(str(agent.act(f)))
+                except Exception:
+                    pass
+            time.sleep(period)
+
+    t = threading.Thread(target=loop, name="cv-driver", daemon=True)
+    t.start()
+    return t
+
+
+def serve(buf: DualRateBuffer, port: int = 8420, fps: int = 60, scale: int = 3) -> None:
+    """Open the game as a directly-viewable WINDOW: an MJPEG video stream of the
+    live buffer over HTTP (any browser renders it), plus /shot.png and /stats."""
+    import json
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    from PIL import Image
+
+    viewer = (
+        "<!doctype html><meta charset=utf8><title>SteamBench frame stream</title>"
+        "<body style='margin:0;background:#0b1018;color:#8aa0bd;font-family:monospace;text-align:center'>"
+        f"<h3 style='color:#66c0f4'>{buf.source.game_id} — live 120Hz video stream</h3>"
+        "<img src='/video.mjpeg' style='image-rendering:pixelated;width:min(90vw,720px);border-radius:12px'>"
+        "<p>video buffer @120Hz · screenshot buffer @60Hz · <a style='color:#22d3ee' href='/shot.png'>/shot.png</a>"
+        " · <a style='color:#22d3ee' href='/stats'>/stats</a></p></body>"
+    ).encode()
+
+    def jpeg(frame: np.ndarray) -> bytes:
+        img = Image.fromarray(frame)
+        if scale != 1:
+            img = img.resize((frame.shape[1] * scale, frame.shape[0] * scale), Image.NEAREST)
+        b = io.BytesIO(); img.save(b, format="JPEG", quality=80)
+        return b.getvalue()
+
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a):  # quiet
+            pass
+
+        def do_GET(self):
+            if self.path.startswith("/video.mjpeg"):
+                self.send_response(200)
+                self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+                self.end_headers()
+                period = 1.0 / fps
+                try:
+                    while True:
+                        f = buf.latest_video()
+                        if f is not None:
+                            j = jpeg(f)
+                            self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\n")
+                            self.wfile.write(f"Content-Length: {len(j)}\r\n\r\n".encode())
+                            self.wfile.write(j); self.wfile.write(b"\r\n")
+                        time.sleep(period)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
+            elif self.path.startswith("/shot.png"):
+                png = buf.latest_shot() or b""
+                self.send_response(200); self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(png))); self.end_headers()
+                self.wfile.write(png)
+            elif self.path.startswith("/stats"):
+                data = json.dumps(buf.stats()).encode()
+                self.send_response(200); self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(data))); self.end_headers()
+                self.wfile.write(data)
+            else:
+                self.send_response(200); self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(viewer))); self.end_headers()
+                self.wfile.write(viewer)
+
+    srv = ThreadingHTTPServer(("127.0.0.1", port), H)
+    print(f"  ▶ stream window: http://127.0.0.1:{port}/  (MJPEG video · /shot.png · /stats) — Ctrl-C to stop")
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+
 # ======================================================================== #
 # CLI / demo
 # ======================================================================== #
@@ -247,10 +336,18 @@ def main() -> None:
     ap.add_argument("--video-hz", type=int, default=120)
     ap.add_argument("--shot-hz", type=int, default=60)
     ap.add_argument("--drive", action="store_true", help="let the game's CV agent drive via the buffer (30Hz)")
+    ap.add_argument("--serve", action="store_true", help="open the game as a viewable MJPEG stream window (HTTP)")
+    ap.add_argument("--port", type=int, default=8420)
     args = ap.parse_args()
 
     buf = open_game(args.game, video_hz=args.video_hz, shot_hz=args.shot_hz)
     print(f"▶ opened '{args.game}' — video@{args.video_hz}Hz + screenshots@{args.shot_hz}Hz, agent can read now.")
+
+    if args.serve:
+        drive_in_background(buf, hz=30)   # the CV agent plays it so the window is live
+        serve(buf, port=args.port)
+        buf.stop()
+        return
 
     if args.drive:
         # Decoupled control: agent decides at 30Hz off the latest video frame
