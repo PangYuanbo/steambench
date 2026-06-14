@@ -1,0 +1,465 @@
+{
+  "agents": [
+    {
+      "player_id": "catcher",
+      "kind": "agent",
+      "total_points": 1734,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000010": {
+          "appid": 9000010,
+          "earned_points": 1734,
+          "earned_bits": 17.349,
+          "total_bits": 17.349,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "connect4",
+      "kind": "agent",
+      "total_points": 1146,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000008": {
+          "appid": 9000008,
+          "earned_points": 1146,
+          "earned_bits": 11.469,
+          "total_bits": 11.469,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "dodger",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000009": {
+          "appid": 9000009,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "flappy",
+      "kind": "agent",
+      "total_points": 1951,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 6,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000007": {
+          "appid": 9000007,
+          "earned_points": 1951,
+          "earned_bits": 19.505,
+          "total_bits": 19.505,
+          "completed_tasks": 6,
+          "total_tasks": 6,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "hamiltonian",
+      "kind": "agent",
+      "total_points": 2917,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 8,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000002": {
+          "appid": 9000002,
+          "earned_points": 2917,
+          "earned_bits": 29.175,
+          "total_bits": 29.175,
+          "completed_tasks": 8,
+          "total_tasks": 8,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "minesweeper",
+      "kind": "agent",
+      "total_points": 860,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000005": {
+          "appid": 9000005,
+          "earned_points": 860,
+          "earned_bits": 8.613,
+          "total_bits": 8.613,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "phantom",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000015": {
+          "appid": 9000015,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "rally",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000016": {
+          "appid": 9000016,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "sokoban",
+      "kind": "agent",
+      "total_points": 1411,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 6,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000003": {
+          "appid": 9000003,
+          "earned_points": 1411,
+          "earned_bits": 14.118,
+          "total_bits": 14.118,
+          "completed_tasks": 6,
+          "total_tasks": 6,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "storm",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000012": {
+          "appid": 9000012,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "tetris",
+      "kind": "agent",
+      "total_points": 1915,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 8,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000004": {
+          "appid": 9000004,
+          "earned_points": 1915,
+          "earned_bits": 19.163,
+          "total_bits": 19.163,
+          "completed_tasks": 8,
+          "total_tasks": 8,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "turret",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000013": {
+          "appid": 9000013,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "volley",
+      "kind": "agent",
+      "total_points": 1776,
+      "weighted_score": 1200.0,
+      "games_played": 1,
+      "tasks_completed": 5,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000011": {
+          "appid": 9000011,
+          "earned_points": 1776,
+          "earned_bits": 17.75,
+          "total_bits": 17.75,
+          "completed_tasks": 5,
+          "total_tasks": 5,
+          "mastery": 1.0,
+          "completion": 1.0
+        }
+      }
+    },
+    {
+      "player_id": "random",
+      "kind": "agent",
+      "total_points": 1029,
+      "weighted_score": 954.13,
+      "games_played": 7,
+      "tasks_completed": 13,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000001": {
+          "appid": 9000001,
+          "earned_points": 233,
+          "earned_bits": 2.334,
+          "total_bits": 35.93,
+          "completed_tasks": 3,
+          "total_tasks": 10,
+          "mastery": 0.0649,
+          "completion": 0.3
+        },
+        "9000002": {
+          "appid": 9000002,
+          "earned_points": 23,
+          "earned_bits": 0.234,
+          "total_bits": 29.175,
+          "completed_tasks": 1,
+          "total_tasks": 8,
+          "mastery": 0.008,
+          "completion": 0.125
+        },
+        "9000003": {
+          "appid": 9000003,
+          "earned_points": 97,
+          "earned_bits": 0.971,
+          "total_bits": 14.118,
+          "completed_tasks": 2,
+          "total_tasks": 6,
+          "mastery": 0.0688,
+          "completion": 0.3333
+        },
+        "9000005": {
+          "appid": 9000005,
+          "earned_points": 454,
+          "earned_bits": 4.554,
+          "total_bits": 8.613,
+          "completed_tasks": 4,
+          "total_tasks": 5,
+          "mastery": 0.5288,
+          "completion": 0.8
+        },
+        "9000009": {
+          "appid": 9000009,
+          "earned_points": 74,
+          "earned_bits": 0.737,
+          "total_bits": 17.75,
+          "completed_tasks": 1,
+          "total_tasks": 5,
+          "mastery": 0.0415,
+          "completion": 0.2
+        },
+        "9000012": {
+          "appid": 9000012,
+          "earned_points": 74,
+          "earned_bits": 0.737,
+          "total_bits": 17.75,
+          "completed_tasks": 1,
+          "total_tasks": 5,
+          "mastery": 0.0415,
+          "completion": 0.2
+        },
+        "9000015": {
+          "appid": 9000015,
+          "earned_points": 74,
+          "earned_bits": 0.737,
+          "total_bits": 17.75,
+          "completed_tasks": 1,
+          "total_tasks": 5,
+          "mastery": 0.0415,
+          "completion": 0.2
+        }
+      }
+    },
+    {
+      "player_id": "bfs",
+      "kind": "agent",
+      "total_points": 1979,
+      "weighted_score": 814.16,
+      "games_played": 1,
+      "tasks_completed": 7,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000002": {
+          "appid": 9000002,
+          "earned_points": 1979,
+          "earned_bits": 19.795,
+          "total_bits": 29.175,
+          "completed_tasks": 7,
+          "total_tasks": 8,
+          "mastery": 0.6785,
+          "completion": 0.875
+        }
+      }
+    },
+    {
+      "player_id": "forager",
+      "kind": "agent",
+      "total_points": 1038,
+      "weighted_score": 701.02,
+      "games_played": 1,
+      "tasks_completed": 4,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000014": {
+          "appid": 9000014,
+          "earned_points": 1038,
+          "earned_bits": 10.369,
+          "total_bits": 17.75,
+          "completed_tasks": 4,
+          "total_tasks": 5,
+          "mastery": 0.5842,
+          "completion": 0.8
+        }
+      }
+    },
+    {
+      "player_id": "expectimax",
+      "kind": "agent",
+      "total_points": 1900,
+      "weighted_score": 635.12,
+      "games_played": 1,
+      "tasks_completed": 8,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000001": {
+          "appid": 9000001,
+          "earned_points": 1900,
+          "earned_bits": 19.017,
+          "total_bits": 35.93,
+          "completed_tasks": 8,
+          "total_tasks": 10,
+          "mastery": 0.5293,
+          "completion": 0.8
+        }
+      }
+    }
+  ],
+  "envs": [
+    "arcade/2048",
+    "arcade/snake",
+    "arcade/sokoban",
+    "arcade/tetris",
+    "arcade/minesweeper",
+    "arcade/flappy",
+    "arcade/connect4",
+    "arcade/dodger",
+    "arcade/catcher",
+    "arcade/volley",
+    "arcade/storm",
+    "arcade/turret",
+    "arcade/forager",
+    "arcade/phantom",
+    "arcade/rally"
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

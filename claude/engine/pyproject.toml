@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "steambench-engine"
+version = "0.1.0"
+description = "SteamBench scoring engine: Steam achievement rarity -> information-theoretic benchmark difficulty, scoring, and Human-vs-AI Elo."
+requires-python = ">=3.9"
+dependencies = []  # core engine is stdlib-only by design
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+include = ["steambench*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

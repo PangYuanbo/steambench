@@ -1,0 +1,94 @@
+{
+  "agents": [
+    {
+      "player_id": "bfs",
+      "kind": "agent",
+      "total_points": 1979,
+      "weighted_score": 814.16,
+      "games_played": 1,
+      "tasks_completed": 7,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000002": {
+          "appid": 9000002,
+          "earned_points": 1979,
+          "earned_bits": 19.795,
+          "total_bits": 29.175,
+          "completed_tasks": 7,
+          "total_tasks": 8,
+          "mastery": 0.6785,
+          "completion": 0.875
+        }
+      }
+    },
+    {
+      "player_id": "expectimax",
+      "kind": "agent",
+      "total_points": 1900,
+      "weighted_score": 635.12,
+      "games_played": 1,
+      "tasks_completed": 8,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000001": {
+          "appid": 9000001,
+          "earned_points": 1900,
+          "earned_bits": 19.017,
+          "total_bits": 35.93,
+          "completed_tasks": 8,
+          "total_tasks": 10,
+          "mastery": 0.5293,
+          "completion": 0.8
+        }
+      }
+    },
+    {
+      "player_id": "random",
+      "kind": "agent",
+      "total_points": 256,
+      "weighted_score": 87.58,
+      "games_played": 2,
+      "tasks_completed": 4,
+      "legendary_count": 0,
+      "elo": 1200.0,
+      "per_game": {
+        "9000001": {
+          "appid": 9000001,
+          "earned_points": 233,
+          "earned_bits": 2.334,
+          "total_bits": 35.93,
+          "completed_tasks": 3,
+          "total_tasks": 10,
+          "mastery": 0.0649,
+          "completion": 0.3
+        },
+        "9000002": {
+          "appid": 9000002,
+          "earned_points": 23,
+          "earned_bits": 0.234,
+          "total_bits": 29.175,
+          "completed_tasks": 1,
+          "total_tasks": 8,
+          "mastery": 0.008,
+          "completion": 0.125
+        }
+      }
+    }
+  ],
+  "envs": [
+    "arcade/2048",
+    "arcade/snake"
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "num_games": 97,
+  "total_tasks": 9856,
+  "by_tier": {
+    "tutorial": 775,
+    "easy": 2174,
+    "medium": 3832,
+    "hard": 2136,
+    "elite": 862,
+    "legendary": 77
+  },
+  "hardest_overall": [
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Treasure ahoy!",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Hostile Waters",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Swim with the fishes",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Stellaris",
+      "appid": 281990,
+      "name": "achievement_burning_heaven",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Stellaris",
+      "appid": 281990,
+      "name": "achievement_from_bad_to_worse",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Stellaris",
+      "appid": 281990,
+      "name": "achievement_this_is_the_part_where_we_kill_you",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "Start your engines!",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "Grand Circuit Pro",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "I Run This City",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "Tour de Metro",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "Foot Traffic",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "White Night",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "He Did What in This Cup?",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Cities: Skylines",
+      "appid": 255710,
+      "name": "Grande Parade",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Starfield",
+      "appid": 1716740,
+      "name": "Stay of Execution",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Starfield",
+      "appid": 1716740,
+      "name": "Riddle Management",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Ain't like that now",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Czechoslovaustrohungarian Union",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Steiner",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Saving Private Bryansk",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Et tu, Paulus?",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Hunt for the Desert Fox",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "A Bridge too Far",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Waltzing Matilda",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "The 7th State",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "The rightside up",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "A Succulent Chinese Meal",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "ANZAC",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Noone Will Notice the Difference",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Java-Script",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "The Man of Medan",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Maphilindia",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Old Zealand",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "From Rags to Admiral Stripes",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Hail to the King",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Grand Siam",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "ThaiTanic",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Hearts of Iron IV",
+      "appid": 394360,
+      "name": "Thai fighters",
+      "percent": 0.0,
+      "points": 1329,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "Yeah, Platformer is my thing",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "Moons are kinda neat",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "I like moons",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "Moons > Stars",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "I love moons!",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "We are going to steal the moon",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "One giant leap for mankind",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "List Whisperer",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Geometry Dash",
+      "appid": 322170,
+      "name": "200 Lists, 1 Legend",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Death from Above",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Apex Predator",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    },
+    {
+      "game": "Rust",
+      "appid": 252490,
+      "name": "Smooth Sailing",
+      "percent": 0.1,
+      "points": 997,
+      "tier": "legendary"
+    }
+  ]
+}

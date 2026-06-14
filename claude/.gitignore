@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node / Next (web/ has its own .gitignore too — this is a safety net)
+node_modules/
+.next/
+.vercel/
+out/
+build/
+
+# Env / secrets — never commit keys
+.env
+.env.*
+*.pem
+
+# OS / editor
+.DS_Store
+*.log
