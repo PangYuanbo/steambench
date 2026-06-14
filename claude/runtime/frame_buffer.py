@@ -296,6 +296,9 @@ class BrowserFrameSource:
         self.noop = GamepadAction()
         self._use_screen = capture == "screen"
         self._pw = self._ctx = self._page = None
+        self._cdp = None
+        self._screencast = False
+        self._latest = None       # latest decoded screencast frame (np)
 
     def make_agent(self):
         from gamepad_agents import VisionGamepadAgent
@@ -331,6 +334,29 @@ class BrowserFrameSource:
             self._page.evaluate("window.__gpFireConnected && window.__gpFireConnected()")
         except Exception:
             pass
+        # CDP screencast: Chrome PUSHES frames (~30-60fps) — far faster than a
+        # per-tick screenshot. Frames arrive on this (producer) thread while we
+        # make page calls; we keep the latest decoded frame.
+        if self.capture in ("auto", "page"):
+            try:
+                self._cdp = self._ctx.new_cdp_session(self._page)
+                self._cdp.on("Page.screencastFrame", self._on_cast)
+                self._cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 70, "everyNthFrame": 1})
+                self._screencast = True
+            except Exception:
+                self._screencast = False
+
+    def _on_cast(self, params: dict) -> None:
+        import base64
+
+        try:
+            self._latest = self._png_to_np(base64.b64decode(params["data"]))  # PIL decodes JPEG too
+        except Exception:
+            pass
+        try:
+            self._cdp.send("Page.screencastFrameAck", {"sessionId": params["sessionId"]})
+        except Exception:
+            pass
 
     def tick(self, action):
         if self._page is None:
@@ -340,9 +366,16 @@ class BrowserFrameSource:
         ga = action if isinstance(action, self._GA) else self._space.coerce(action)
         axes, buttons = action_to_state(ga)
         try:
+            # applying the pad also pumps CDP events, so a screencast frame lands
             self._page.evaluate("([a,b]) => window.__gpSetState && window.__gpSetState(a,b)", [axes, buttons])
         except Exception:
             pass
+        if self._screencast and self._latest is not None and not self._use_screen:
+            f = self._latest
+            if self.capture == "auto" and float(f.mean()) < 8.0:   # GPU-overlay black → OS capture
+                self._use_screen = True
+                return self._screen_np()
+            return f
         return self._capture()
 
     def _png_to_np(self, png: bytes):
@@ -391,6 +424,11 @@ class BrowserFrameSource:
         return arr
 
     def stop(self) -> None:
+        try:
+            if self._cdp:
+                self._cdp.send("Page.stopScreencast")
+        except Exception:
+            pass
         for fn in (lambda: self._ctx and self._ctx.close(), lambda: self._pw and self._pw.stop()):
             try:
                 fn()
@@ -550,7 +588,9 @@ def _browser_test(args) -> int:
     print("\n── browser → dual buffers ──────────────")
     print(f"  video:  {s['video_fps']:>5} fps · buffer holds {s['video_buffer']} frames {'(moving)' if moving else '(static)'}")
     print(f"  shots:  {s['shot_fps']:>5} fps · buffer holds {s['shot_buffer']} PNGs · latest = {len(shot or b'')} bytes")
-    print(f"  capture path: {'OS screen' if buf.source._use_screen else 'in-page screenshot'} (browser-limited rate)")
+    path = ("OS screen capture" if buf.source._use_screen
+            else "CDP screencast" if buf.source._screencast else "in-page screenshot")
+    print(f"  capture path: {path} (browser-limited rate)")
     ok = s["video_buffer"] > 0 and s["shot_buffer"] > 0 and bool(shot) and moving
     print("\n" + ("PASS — an agent on a BROWSER game gets the same two buffers (video + screenshot); "
                   "the gamepad drove it (sprite moved). Point --gfn at GeForce NOW for the real thing."
