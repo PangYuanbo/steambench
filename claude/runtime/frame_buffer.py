@@ -56,6 +56,21 @@ GAMES: dict[str, tuple[type, type, str]] = {
 }
 
 
+# A self-contained browser game (reads the standard Gamepad API exactly as GFN
+# does) for loginless verification that a BROWSER source feeds both buffers.
+DEMO_HTML = (
+    "<!doctype html><meta charset=utf8><body style='margin:0'>"
+    "<canvas id=c width=320 height=180></canvas><script>"
+    "let x=160,y=90,a=false;const ctx=document.getElementById('c').getContext('2d');"
+    "setInterval(()=>{const g=navigator.getGamepads&&navigator.getGamepads()[0];"
+    "if(g){x+=g.axes[0]*6;y+=g.axes[1]*6;a=g.buttons[0].pressed;"
+    "x=Math.max(8,Math.min(312,x));y=Math.max(8,Math.min(172,y));}"
+    "ctx.fillStyle=a?'#4ade80':'#0b1018';ctx.fillRect(0,0,320,180);"
+    "ctx.fillStyle='#66c0f4';ctx.fillRect(x-8,y-8,16,16);},25);"
+    "</script></body>"
+)
+
+
 class _Ring:
     """A tiny thread-safe ring buffer of (timestamp, item)."""
 
@@ -102,6 +117,12 @@ class GameSource:
         if hasattr(a, "reset"):
             a.reset()
         return a
+
+    def start(self) -> None:   # game already constructed in __init__
+        pass
+
+    def stop(self) -> None:
+        pass
 
     def tick(self, action: str) -> np.ndarray:
         frame = self.game.step(action)
@@ -177,14 +198,14 @@ class DualRateBuffer:
     def stats(self) -> dict:
         elapsed = max(1e-6, time.perf_counter() - self._t0) if self._t0 else 0.0
         return {
-            "game": self.source.game_id,
+            "game": getattr(self.source, "game_id", "browser"),
             "ticks": self._ticks,
             "video_fps": round(self._ticks / elapsed, 1) if elapsed else 0.0,
             "shot_fps": round(self.shots.pushed / elapsed, 1) if elapsed else 0.0,
             "video_buffer": len(self.video),
             "shot_buffer": len(self.shots),
-            "episodes": self.source.episodes,
-            "best_score": self.source.best_score,
+            "episodes": getattr(self.source, "episodes", 0),
+            "best_score": getattr(self.source, "best_score", 0),
         }
 
     # ---- lifecycle -------------------------------------------------------- #
@@ -202,25 +223,32 @@ class DualRateBuffer:
             self._thread.join(timeout=1.0)
 
     def _produce(self) -> None:
-        period = 1.0 / self.video_hz
-        shot_every = max(1, round(self.video_hz / self.shot_hz))
-        next_tick = time.perf_counter()
-        while self._running:
-            with self._action_lock:
-                action = self._action
-            frame = self.source.tick(action)
-            now = time.perf_counter()
-            self.video.push(now, frame)
-            if self._ticks % shot_every == 0:
-                self.shots.push(now, encode_png(frame, self.shot_scale))
-            self._ticks += 1
-            # pace to the video rate; if we fell behind, resync without spiraling.
-            next_tick += period
-            slack = next_tick - time.perf_counter()
-            if slack > 0:
-                time.sleep(slack)
-            else:
-                next_tick = time.perf_counter()
+        # The source is started HERE (in the producer thread) — required for the
+        # browser source, whose Playwright objects are thread-affine.
+        self.source.start()
+        try:
+            period = 1.0 / self.video_hz
+            shot_every = max(1, round(self.video_hz / self.shot_hz))
+            next_tick = time.perf_counter()
+            while self._running:
+                with self._action_lock:
+                    action = self._action
+                frame = self.source.tick(action)
+                now = time.perf_counter()
+                if frame is not None:
+                    self.video.push(now, frame)
+                    if self._ticks % shot_every == 0:
+                        self.shots.push(now, encode_png(frame, self.shot_scale))
+                self._ticks += 1
+                # pace to the video rate; if we fell behind, resync without spiraling.
+                next_tick += period
+                slack = next_tick - time.perf_counter()
+                if slack > 0:
+                    time.sleep(slack)
+                else:
+                    next_tick = time.perf_counter()
+        finally:
+            self.source.stop()
 
     def __enter__(self):
         return self.start()
@@ -233,6 +261,148 @@ def open_game(game_id: str, seed: int = 1, **kw) -> DualRateBuffer:
     """Open a game's environment ready-to-run with both buffers live — the agent
     attaches and reads immediately."""
     return DualRateBuffer(GameSource(game_id, seed), **kw).start()
+
+
+class BrowserFrameSource:
+    """Frame source for a BROWSER game (GeForce NOW) — gives an agent the SAME
+    dual-rate buffers as a local game. Owns a Playwright page (created in the
+    producer thread, for Playwright's thread-affinity), injects a virtual gamepad,
+    applies the agent's GamepadAction each tick, and captures the current frame as
+    an RGB array. The game runs autonomously on the cloud; we observe + inject.
+    Capture rate is browser/stream-limited (not a true 120Hz), but the agent gets
+    the identical video-buffer + screenshot-buffer experience.
+    """
+
+    def __init__(
+        self,
+        url: Optional[str] = None,
+        *,
+        headless: bool = False,
+        capture: str = "auto",          # "auto" | "page" | "screen"
+        capture_region=None,
+        init_html: Optional[str] = None,  # for loginless self-test (a data: game)
+    ) -> None:
+        from steambench_harness.gamepad import STANDARD_GAMEPAD, GamepadAction
+
+        from gfn_browser import GFN_URL
+
+        self.url = url or GFN_URL
+        self.headless = headless
+        self.capture = capture
+        self.capture_region = capture_region
+        self.init_html = init_html
+        self._space = STANDARD_GAMEPAD
+        self._GA = GamepadAction
+        self.noop = GamepadAction()
+        self._use_screen = capture == "screen"
+        self._pw = self._ctx = self._page = None
+
+    def make_agent(self):
+        from gamepad_agents import VisionGamepadAgent
+
+        a = VisionGamepadAgent(goal="Play the game on screen; make progress.")
+        a.reset()
+        return a
+
+    def start(self) -> None:
+        from playwright.sync_api import sync_playwright
+
+        from gfn_browser import GAMEPAD_INIT_JS
+
+        self._pw = sync_playwright().start()
+        prof = str(ROOT / ".gfn-profile")
+        kw = dict(headless=self.headless, viewport={"width": 1280, "height": 720},
+                  args=["--disable-blink-features=AutomationControlled"],
+                  ignore_default_args=["--enable-automation"])
+        try:
+            self._ctx = self._pw.chromium.launch_persistent_context(prof, channel="chrome", **kw)
+        except Exception:
+            self._ctx = self._pw.chromium.launch_persistent_context(prof, **kw)
+        self._ctx.add_init_script(GAMEPAD_INIT_JS)
+        self._page = self._ctx.pages[0] if self._ctx.pages else self._ctx.new_page()
+        if self.init_html is not None:        # loginless self-test game
+            import urllib.parse
+
+            self._page.goto("data:text/html;charset=utf-8," + urllib.parse.quote(self.init_html))
+        else:
+            self._page.goto(self.url, wait_until="domcontentloaded")
+        self._page.wait_for_timeout(60)
+        try:
+            self._page.evaluate("window.__gpFireConnected && window.__gpFireConnected()")
+        except Exception:
+            pass
+
+    def tick(self, action):
+        if self._page is None:
+            return None
+        from gfn_browser import action_to_state
+
+        ga = action if isinstance(action, self._GA) else self._space.coerce(action)
+        axes, buttons = action_to_state(ga)
+        try:
+            self._page.evaluate("([a,b]) => window.__gpSetState && window.__gpSetState(a,b)", [axes, buttons])
+        except Exception:
+            pass
+        return self._capture()
+
+    def _png_to_np(self, png: bytes):
+        if not png:
+            return None
+        try:
+            from PIL import Image
+
+            return np.asarray(Image.open(io.BytesIO(png)).convert("RGB"))
+        except Exception:
+            return None
+
+    def _screen_np(self):
+        import os
+        import subprocess
+        import tempfile
+
+        out = os.path.join(tempfile.gettempdir(), "sb_fb_frame.png")
+        cmd = ["screencapture", "-x", "-t", "png"]
+        if self.capture_region:
+            x, y, w, h = self.capture_region
+            cmd.append(f"-R{x},{y},{w},{h}")
+        cmd.append(out)
+        try:
+            subprocess.run(cmd, check=False, timeout=10, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            with open(out, "rb") as f:
+                return self._png_to_np(f.read())
+        except Exception:
+            return None
+
+    def _capture(self):
+        if self._use_screen:
+            return self._screen_np()
+        try:
+            box = self._page.evaluate(
+                "(() => { const v = document.querySelector('video,canvas'); if (!v) return null; "
+                "const r = v.getBoundingClientRect(); return {x:r.x, y:r.y, width:r.width, height:r.height}; })()"
+            )
+            png = self._page.screenshot(clip=box) if (box and box["width"] > 4 and box["height"] > 4) else self._page.screenshot()
+        except Exception:
+            return None
+        arr = self._png_to_np(png)
+        if self.capture == "auto" and arr is not None and float(arr.mean()) < 8.0:
+            self._use_screen = True            # GPU-overlay black → OS capture
+            return self._screen_np()
+        return arr
+
+    def stop(self) -> None:
+        for fn in (lambda: self._ctx and self._ctx.close(), lambda: self._pw and self._pw.stop()):
+            try:
+                fn()
+            except Exception:
+                pass
+
+
+def open_browser(url: Optional[str] = None, *, video_hz: int = 120, shot_hz: int = 60, **src_kw) -> DualRateBuffer:
+    """Open a browser game (GeForce NOW by default) with the same dual-rate
+    buffers a local game gets. The agent reads video + screenshots and sets
+    GamepadActions; the GFN game runs on the cloud."""
+    return DualRateBuffer(BrowserFrameSource(url, **src_kw), video_hz=video_hz, shot_hz=shot_hz).start()
 
 
 def drive_in_background(buf: DualRateBuffer, hz: int = 30) -> threading.Thread:
@@ -329,6 +499,77 @@ def serve(buf: DualRateBuffer, port: int = 8420, fps: int = 60, scale: int = 3) 
 # ======================================================================== #
 
 
+def drive_browser_in_background(buf: DualRateBuffer, hz: int = 8) -> threading.Thread:
+    """Drive a browser game with a vision gamepad agent off the screenshot buffer
+    (slower cadence — vision decisions are expensive). Daemon thread."""
+    import base64
+
+    from steambench_harness.protocol import Observation
+
+    agent = buf.source.make_agent()
+
+    def loop():
+        period = 1.0 / hz
+        while True:
+            shot = buf.latest_shot()
+            if shot:
+                obs = Observation(step=0, state={}, frame=base64.b64encode(shot).decode("ascii"), legal_actions=[])
+                try:
+                    buf.set_action(agent.act(obs))
+                except Exception:
+                    pass
+            time.sleep(period)
+
+    t = threading.Thread(target=loop, name="browser-driver", daemon=True)
+    t.start()
+    return t
+
+
+def _browser_test(args) -> int:
+    """Loginless proof: a GFN-class browser game (reads the Gamepad API) feeds the
+    SAME dual-rate buffers — the agent's gamepad moves it and both buffers fill."""
+    from steambench_harness.gamepad import GamepadAction
+
+    buf = open_browser(init_html=DEMO_HTML, headless=True, video_hz=args.video_hz, shot_hz=args.shot_hz)
+    print("▶ a loginless browser game (standard Gamepad API, GFN-class) feeding the dual-rate buffers…")
+    moves = [GamepadAction.move(lx=1.0), GamepadAction.move(ly=1.0), GamepadAction.move(lx=-1.0), GamepadAction.press("A")]
+    end = time.perf_counter() + args.secs
+    i = 0
+    while time.perf_counter() < end:
+        buf.set_action(moves[i % len(moves)])   # agent drives via the gamepad
+        i += 1
+        time.sleep(0.4)
+    time.sleep(0.2)
+    s = buf.stats()
+    vid = buf.video_window()
+    shot = buf.latest_shot()
+    buf.stop()
+    # the only motion in the game is the sprite the gamepad drives, so frame
+    # variance across the buffer ⇔ the injected gamepad actually moved it.
+    moving = len(vid) >= 2 and any(not np.array_equal(vid[0], f) for f in vid[1:])
+    print("\n── browser → dual buffers ──────────────")
+    print(f"  video:  {s['video_fps']:>5} fps · buffer holds {s['video_buffer']} frames {'(moving)' if moving else '(static)'}")
+    print(f"  shots:  {s['shot_fps']:>5} fps · buffer holds {s['shot_buffer']} PNGs · latest = {len(shot or b'')} bytes")
+    print(f"  capture path: {'OS screen' if buf.source._use_screen else 'in-page screenshot'} (browser-limited rate)")
+    ok = s["video_buffer"] > 0 and s["shot_buffer"] > 0 and bool(shot) and moving
+    print("\n" + ("PASS — an agent on a BROWSER game gets the same two buffers (video + screenshot); "
+                  "the gamepad drove it (sprite moved). Point --gfn at GeForce NOW for the real thing."
+                  if ok else "FAIL — see numbers above."))
+    return 0 if ok else 1
+
+
+def _gfn(args) -> int:
+    """Open GeForce NOW with the dual-rate buffers + a viewable stream window; you
+    log into NVIDIA + start a game, the agent gets video + screenshot buffers."""
+    buf = open_browser(args.url or None, headless=False, video_hz=args.video_hz, shot_hz=args.shot_hz)
+    print("▶ Opening GeForce NOW — log into NVIDIA + start a game in the window.")
+    print("  The agent reads a video buffer + screenshot buffer; watch the captured stream below.")
+    drive_browser_in_background(buf, hz=6)
+    serve(buf)            # view what the agent sees + /stats
+    buf.stop()
+    return 0
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Dual-rate game frame buffers (120Hz video + 60Hz screenshots)")
     ap.add_argument("--game", default="dodger", choices=sorted(GAMES))
@@ -338,7 +579,15 @@ def main() -> None:
     ap.add_argument("--drive", action="store_true", help="let the game's CV agent drive via the buffer (30Hz)")
     ap.add_argument("--serve", action="store_true", help="open the game as a viewable MJPEG stream window (HTTP)")
     ap.add_argument("--port", type=int, default=8420)
+    ap.add_argument("--browser-test", action="store_true", help="loginless: a browser game feeds the dual buffers")
+    ap.add_argument("--gfn", action="store_true", help="open GeForce NOW with the dual buffers + stream window")
+    ap.add_argument("--url", default="", help="override the browser URL (for --gfn)")
     args = ap.parse_args()
+
+    if args.browser_test:
+        raise SystemExit(_browser_test(args))
+    if args.gfn:
+        raise SystemExit(_gfn(args))
 
     buf = open_game(args.game, video_hz=args.video_hz, shot_hz=args.shot_hz)
     print(f"▶ opened '{args.game}' — video@{args.video_hz}Hz + screenshots@{args.shot_hz}Hz, agent can read now.")
