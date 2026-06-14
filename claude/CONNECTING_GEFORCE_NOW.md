@@ -7,10 +7,42 @@ scoring, the trace, and the leaderboard submit all work today against a mock
 session. Going live is wiring **one adapter**: `GeForceNowSession`.
 
 ```
- VisionGamepadAgent ──reads frame──▶ RealGameEnv ──GamepadAction──▶ GeForceNowSession ──▶ GeForce NOW ──▶ the game
-        ▲ pixels                         │ score = bits of unlocked achievements        (capture · virtual pad · Steam)
+ VisionGamepadAgent ──reads frame──▶ RealGameEnv ──GamepadAction──▶ GameSession ──▶ GeForce NOW ──▶ the game
+        ▲ pixels                         │ score = bits of unlocked achievements
         └──────────────── obs.frame ◀────┘
 ```
+
+## Two bridges
+
+There are two ways to deliver the agent's gamepad into GeForce NOW:
+
+- **Browser bridge (recommended; works on macOS) — `runtime/gfn_browser.py`.**
+  GeForce NOW's web client reads the **standard Gamepad API**. Playwright drives
+  the *real system Chrome* and injects a virtual gamepad into the page
+  (`navigator.getGamepads` returns a controllable pad), so the game polls our
+  state every frame as if a controller were plugged in. No OS driver, no
+  Windows. This is verified working:
+
+  ```bash
+  # prove the CLI-simulated gamepad is seen by the browser (no GFN/login needed):
+  PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/gfn_browser.py --test
+
+  # drive GeForce NOW: opens real Chrome — log into NVIDIA + start a game once
+  # (the profile is remembered), then a gamepad agent drives it:
+  PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/gfn_browser.py --play --agent vision
+  ```
+
+  `BrowserGamepadSession` is a `GameSession`, so the existing gamepad agents and
+  `RealGameEnv` drive it unchanged. Frames come from the streamed `<video>`;
+  because GFN hardware-decodes WebRTC into a GPU overlay, in-page capture can
+  read back black — if so, capture the Chrome window with `mss`/`screencapture`
+  (headed) instead (grant macOS Screen-Recording permission once).
+
+- **Native bridge (Windows) — `runtime/geforce_now.py`.** A real virtual Xbox
+  pad via `vgamepad`/ViGEm + screen-capture of the GFN window. Use this with the
+  native GFN app on Windows.
+
+Both implement the same `GameSession` contract below.
 
 ## What you provide
 

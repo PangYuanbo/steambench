@@ -46,7 +46,7 @@ Points are `100 × bits`. A 50%-of-players achievement is worth 100 pts; a
 | 🔌 **Steam binding** | "Sign in through Steam" (OpenID 2.0) and score your *real* achievements — works keyless via public Steam endpoints. |
 | ☁️ **Remote runtime** | A Modal app runs the reference agents and submits verified runs to the live API — the "agents run somewhere and score" path. |
 | 🎥 **Native pixel runtime → scored** | The frontier, now *first-class benchmark games*: an **eight-game vision suite** runs as real rendered games on Modal, and a **vision agent reads raw pixels** (not state) across the full capability spectrum — avoid (Dodger), *good* vs *bad* (Catcher), single-object **motion** (Volley), **multi-object tracking** (Storm), **aim + fire targeting** (Turret), **free 2D navigation** (Forager), **memory under occlusion** (Phantom: the screen blinks dark, so the agent must *remember* what it can't see — its recalled positions are drawn on the overlay), and **adversarial play** (Rally: a Pong duel vs a built-in opponent) — with perception overlaid live at [/native](https://web-iota-steel-12.vercel.app/native), then **submits its pixel run to the leaderboard, replay-verified on the same engine that checks humans.** Eight modalities prove the pixels-in/inputs-out runtime generalizes; each is also playable from structured state. |
-| 🎮 **Real games via GeForce NOW** | The platform's real-game half: an agent's **action space is a virtual gamepad** (15 buttons + 2 analog sticks + 2 triggers), its observation is the streamed frame, and a run is verified out-of-band via the **Steam Web API** (did the bound account actually unlock the achievement?). It runs end-to-end today against a mock session; going live = implement **one** `GameSession` adapter (screen-capture + virtual pad + Steam poll), shipped as a turnkey skeleton in `runtime/geforce_now.py`. This is how an AI plays a *real* Steam game on the very same benchmark a human does — the agent gets exactly the affordance a human has: a controller. |
+| 🎮 **Real games via GeForce NOW** | The platform's real-game half: an agent's **action space is a virtual gamepad** (15 buttons + 2 analog sticks + 2 triggers), its observation is the streamed frame, and a run is verified out-of-band via the **Steam Web API**. **The browser bridge is built + verified** (`runtime/gfn_browser.py`): Playwright drives real Chrome and injects a virtual gamepad through the **standard Gamepad API** that GeForce NOW web reads, so the agent's controller frames drive a real streamed game — `--test` proves the simulated pad is seen by the browser exactly like a physical controller. (A native ViGEm/Windows bridge — `runtime/geforce_now.py` — is also provided.) This is how an AI plays a *real* Steam game on the very same benchmark a human does — the agent gets exactly the affordance a human has: a controller. |
 
 ## Verification — why scores can't be faked
 
@@ -136,10 +136,11 @@ runtime/   Modal apps: modal_app.py (remote agent runtime → submits verified r
            store_service.py (durable run store), modal_pixel.py + pixel_game.py
            (8 rendered vision games + CV agents → stream frames to /native; their
            pixel runs are submittable to the board, replay-verified).
-           geforce_now.py (turnkey GeForce NOW GameSession: screen-capture +
-           virtual gamepad + Steam achievement poll) · geforce_now_check.py
-           (pre-flight readiness check) · realgame_demo.py (the gamepad →
-           real-game loop, runnable against a mock session today).
+           gfn_browser.py (BROWSER GeForce NOW bridge: Playwright drives real
+           Chrome + injects a virtual gamepad via the standard Gamepad API GFN
+           web reads — verified; --test / --play) · geforce_now.py (native
+           ViGEm/Windows GameSession) · geforce_now_check.py (pre-flight check) ·
+           realgame_demo.py (the gamepad → real-game loop vs a mock session).
 web/       Next.js 16 + React 19 + Tailwind v4 app (frontend + API). TS port of the arcade envs in src/lib/arcade.
 data/      Generated seed catalog, leaderboard, runs, and cross-language replay fixtures.
 ```

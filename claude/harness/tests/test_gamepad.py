@@ -201,5 +201,25 @@ class _Idle:
         return NEUTRAL
 
 
+def test_browser_bridge_action_to_state():
+    """The browser GeForce NOW bridge maps a GamepadAction onto the W3C
+    'standard' (axes, buttons) arrays that navigator.getGamepads() exposes —
+    buttons 0=A..16=Guide, triggers on 6/7, sticks negated to the +down Y axis."""
+    from gfn_browser import action_to_state  # runtime/ is on sys.path (top of file)
+
+    axes, buttons = action_to_state(
+        GamepadAction.press("A", "DPAD_UP", lx=0.5, ly=1.0, rt=1.0)
+    )
+    assert buttons[0] == 1.0          # A
+    assert buttons[12] == 1.0         # DPAD_UP
+    assert buttons[7] == 1.0          # RT analog trigger rides button 7
+    assert axes[0] == 0.5             # lx straight through
+    assert axes[1] == -1.0            # ly +up negated to the Gamepad API's +down
+    assert len(buttons) == 17 and len(axes) == 4
+
+    a2, b2 = action_to_state(GamepadAction())   # neutral
+    assert a2 == [0, 0, 0, 0] and sum(b2) == 0
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
