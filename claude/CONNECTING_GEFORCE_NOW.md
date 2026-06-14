@@ -27,10 +27,19 @@ There are two ways to deliver the agent's gamepad into GeForce NOW:
   # prove the CLI-simulated gamepad is seen by the browser (no GFN/login needed):
   PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/gfn_browser.py --test
 
+  # prove the FULL loop end-to-end on a self-contained browser game (no login):
+  # the CLI gamepad drives a sprite + we capture the frame that proves it moved.
+  PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/gfn_browser.py --demo
+
   # drive GeForce NOW: opens real Chrome — log into NVIDIA + start a game once
   # (the profile is remembered), then a gamepad agent drives it:
   PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/gfn_browser.py --play --agent vision
   ```
+
+  One-time setup: `./engine/.venv/bin/pip install playwright` (driver is bundled;
+  `--play` uses your system Chrome via `channel="chrome"`, no `playwright install`
+  needed). For `--play` frame capture, grant Terminal/Python **Screen Recording**
+  permission so the OS-capture fallback works on the live (GPU-overlay) stream.
 
   `BrowserGamepadSession` is a `GameSession`, so the existing gamepad agents and
   `RealGameEnv` drive it unchanged. Frames come from the streamed `<video>`;

@@ -390,6 +390,81 @@ def _self_test() -> int:
     return 0 if ok else 1
 
 
+def _demo() -> int:
+    """Prove the FULL loop end-to-end with no GeForce NOW / login: a self-contained
+    browser game reads navigator.getGamepads() (exactly as GFN does) and moves a
+    sprite; the agent's CLI GamepadActions drive it; we read the game state back
+    AND capture a frame, confirming the browser game responded to the simulated
+    gamepad and the frame reflects it."""
+    from playwright.sync_api import sync_playwright
+
+    GAME = """<!doctype html><meta charset=utf8><body style='margin:0'>
+    <canvas id=c width=320 height=180></canvas><script>
+    let x=160,y=90,a=false;
+    window.__game=()=>({x:Math.round(x),y:Math.round(y),a});
+    const ctx=document.getElementById('c').getContext('2d');
+    setInterval(()=>{                       // setInterval (not rAF) so it runs headless
+      const g=navigator.getGamepads&&navigator.getGamepads()[0];
+      if(g){ x+=g.axes[0]*6; y+=g.axes[1]*6; a=g.buttons[0].pressed;
+        x=Math.max(8,Math.min(312,x)); y=Math.max(8,Math.min(172,y)); }
+      ctx.fillStyle=a?'#4ade80':'#0b1018'; ctx.fillRect(0,0,320,180);
+      ctx.fillStyle='#66c0f4'; ctx.fillRect(x-8,y-8,16,16);
+    },25);
+    </script></body>"""
+
+    ok = True
+    with sync_playwright() as p:
+        try:
+            browser = p.chromium.launch(channel="chrome", headless=True); which = "system chrome"
+        except Exception:
+            browser = p.chromium.launch(headless=True); which = "bundled chromium"
+        import urllib.parse
+
+        page = browser.new_page()
+        page.add_init_script(GAMEPAD_INIT_JS)
+        page.goto("data:text/html;charset=utf-8," + urllib.parse.quote(GAME))
+        page.wait_for_timeout(60)   # let the game's setInterval tick once
+        page.evaluate("window.__gpFireConnected()")
+        print(f"  browser: {which}")
+
+        def drive(ga, ms=350):
+            axes, buttons = action_to_state(ga)
+            page.evaluate("([a,b]) => window.__gpSetState(a,b)", [axes, buttons])
+            page.wait_for_timeout(ms)
+
+        start = page.evaluate("window.__game()")
+        drive(GamepadAction.move(lx=1.0))                 # push right
+        right = page.evaluate("window.__game()")
+        drive(GamepadAction.move(ly=1.0))                 # push up (ly +up -> axisY -1 -> y decreases)
+        up = page.evaluate("window.__game()")
+        drive(GamepadAction.press("A"))                   # hold A -> bg turns green
+        with_a = page.evaluate("window.__game()")
+        # capture a frame through the SAME path the agent's vision uses
+        sess = BrowserGamepadSession(frame_source="page")
+        sess._page = page
+        png = sess.frame()
+        browser.close()
+
+    moved_right = right["x"] > start["x"] + 20
+    moved_up = up["y"] < right["y"] - 20
+    a_registered = with_a["a"] is True
+    frame_ok = bool(png) and not _is_black(png)
+    print(f"  sprite start={start} → right={right} → up={up} → A={with_a}")
+    print(f"  frame: {len(png)} bytes, non-black={frame_ok}")
+    for label, passed in {
+        "left stick moved the sprite RIGHT in the browser game": moved_right,
+        "left stick moved it UP (ly +up convention correct)": moved_up,
+        "button A registered in the game (bg→green)": a_registered,
+        "captured a non-black frame of the result": frame_ok,
+    }.items():
+        print(f"  {'✓' if passed else '✗'} {label}")
+        ok = ok and passed
+    print("\n" + ("PASS — the agent's CLI gamepad OPERATES a real browser game end-to-end "
+                  "(drive → game responds → frame captured). This is the GFN loop, login aside."
+                  if ok else "FAIL — see ✗ above."))
+    return 0 if ok else 1
+
+
 def _play(agent_kind: str, url: str, steps: int) -> int:
     """Open GeForce NOW in real Chrome and drive it with a gamepad agent. You log
     in to NVIDIA in the opened window once (persistent profile remembers it)."""
@@ -433,6 +508,7 @@ def _play(agent_kind: str, url: str, steps: int) -> int:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Browser GeForce NOW gamepad bridge")
     ap.add_argument("--test", action="store_true", help="verify the simulated gamepad is seen by the browser (no GFN)")
+    ap.add_argument("--demo", action="store_true", help="drive a self-contained browser game end-to-end (no GFN/login)")
     ap.add_argument("--play", action="store_true", help="open GeForce NOW + drive it with a gamepad agent")
     ap.add_argument("--agent", default="scripted", choices=["scripted", "random", "vision"])
     ap.add_argument("--url", default=GFN_URL)
@@ -441,6 +517,8 @@ def main() -> None:
 
     if args.test:
         raise SystemExit(_self_test())
+    if args.demo:
+        raise SystemExit(_demo())
     if args.play:
         raise SystemExit(_play(args.agent, args.url, args.steps))
     ap.print_help()
