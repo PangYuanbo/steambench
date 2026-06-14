@@ -23,3 +23,6 @@ build/
 # OS / editor
 .DS_Store
 *.log
+
+# Browser bridge: persistent Chrome profile for the GeForce NOW login
+.gfn-profile/
