@@ -183,7 +183,10 @@ PYTHONPATH=harness:. ./engine/.venv/bin/python runtime/realgame_demo.py --agent 
 cd web && npm install && npm run dev            # http://localhost:3000
 
 # --- Deploy ---
-cd web && vercel --prod                          # web + API
+# Pushes to `main` auto-deploy via Vercel's GitHub integration
+# (project root directory = claude/web). No manual step needed:
+git push                                         # → Vercel builds + deploys the web app
+cd web && vercel --prod                          # (or deploy manually)
 modal run runtime/modal_app.py                   # run agents remotely, submit to the live API
 ```
 
