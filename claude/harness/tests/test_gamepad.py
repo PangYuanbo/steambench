@@ -221,5 +221,31 @@ def test_browser_bridge_action_to_state():
     assert a2 == [0, 0, 0, 0] and sum(b2) == 0
 
 
+def test_frame_buffer_dual_rate():
+    """The research-link runtime: opening a game gives a live video buffer +
+    a separate (slower) screenshot buffer the agent reads, with actions set
+    asynchronously. Rates are machine-dependent; assert the structure, not exact fps."""
+    pytest.importorskip("numpy")
+    pytest.importorskip("PIL")
+    import time as _time
+
+    from frame_buffer import open_game
+
+    buf = open_game("dodger", video_hz=120, shot_hz=60)
+    try:
+        buf.set_action("left")          # agent sets action asynchronously
+        _time.sleep(0.6)
+        s = buf.stats()
+        assert s["ticks"] > 30                                  # producer thread ran
+        assert s["video_buffer"] > 0 and s["shot_buffer"] > 0   # both buffers filling
+        assert buf.latest_video() is not None                   # raw frame available
+        shot = buf.latest_shot()
+        assert shot and shot[:4] == b"\x89PNG"                  # screenshot is a PNG
+        assert s["video_buffer"] >= s["shot_buffer"]            # video rate ≥ screenshot rate
+        assert len(buf.video_window(8)) <= 8                    # windowed read works
+    finally:
+        buf.stop()
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))

@@ -141,6 +141,9 @@ runtime/   Modal apps: modal_app.py (remote agent runtime → submits verified r
            web reads — verified; --test / --play) · geforce_now.py (native
            ViGEm/Windows GameSession) · geforce_now_check.py (pre-flight check) ·
            realgame_demo.py (the gamepad → real-game loop vs a mock session).
+           frame_buffer.py (research-link runtime: open any game ready-to-run with
+           a 120Hz video buffer + a separate 60Hz screenshot buffer the agent
+           reads; --serve opens it as a browser-viewable MJPEG stream window).
 web/       Next.js 16 + React 19 + Tailwind v4 app (frontend + API). TS port of the arcade envs in src/lib/arcade.
 data/      Generated seed catalog, leaderboard, runs, and cross-language replay fixtures.
 ```
