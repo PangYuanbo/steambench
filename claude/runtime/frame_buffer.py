@@ -281,6 +281,7 @@ class BrowserFrameSource:
         capture: str = "auto",          # "auto" | "page" | "screen"
         capture_region=None,
         init_html: Optional[str] = None,  # for loginless self-test (a data: game)
+        cdp_url: Optional[str] = None,    # attach to a Chrome the user already runs
     ) -> None:
         from steambench_harness.gamepad import STANDARD_GAMEPAD, GamepadAction
 
@@ -291,6 +292,7 @@ class BrowserFrameSource:
         self.capture = capture
         self.capture_region = capture_region
         self.init_html = init_html
+        self.cdp_url = cdp_url
         self._space = STANDARD_GAMEPAD
         self._GA = GamepadAction
         self.noop = GamepadAction()
@@ -298,6 +300,7 @@ class BrowserFrameSource:
         self._pw = self._ctx = self._page = None
         self._cdp = None
         self._screencast = False
+        self._attached = False
         self._latest = None       # latest decoded screencast frame (np)
 
     def make_agent(self):
@@ -313,22 +316,46 @@ class BrowserFrameSource:
         from gfn_browser import GAMEPAD_INIT_JS
 
         self._pw = sync_playwright().start()
-        prof = str(ROOT / ".gfn-profile")
-        kw = dict(headless=self.headless, viewport={"width": 1280, "height": 720},
-                  args=["--disable-blink-features=AutomationControlled"],
-                  ignore_default_args=["--enable-automation"])
-        try:
-            self._ctx = self._pw.chromium.launch_persistent_context(prof, channel="chrome", **kw)
-        except Exception:
-            self._ctx = self._pw.chromium.launch_persistent_context(prof, **kw)
-        self._ctx.add_init_script(GAMEPAD_INIT_JS)
-        self._page = self._ctx.pages[0] if self._ctx.pages else self._ctx.new_page()
-        if self.init_html is not None:        # loginless self-test game
-            import urllib.parse
-
-            self._page.goto("data:text/html;charset=utf-8," + urllib.parse.quote(self.init_html))
+        if self.cdp_url:
+            # Attach to a Chrome the USER launched (--remote-debugging-port) and
+            # logged into GFN in. We don't own it, so we won't close it.
+            self._attached = True
+            browser = self._pw.chromium.connect_over_cdp(self.cdp_url)
+            page = None
+            for ctx in browser.contexts:
+                for pg in ctx.pages:
+                    if "geforcenow" in (pg.url or ""):
+                        page = pg
+                        break
+                if page:
+                    break
+            if page is None:
+                ctx0 = browser.contexts[0] if browser.contexts else browser.new_context()
+                page = ctx0.pages[0] if ctx0.pages else ctx0.new_page()
+            self._ctx = page.context
+            self._page = page
+            try:
+                self._ctx.add_init_script(GAMEPAD_INIT_JS)        # future navigations
+            except Exception:
+                pass
+            self._page.evaluate(GAMEPAD_INIT_JS)                  # the already-open page
         else:
-            self._page.goto(self.url, wait_until="domcontentloaded")
+            prof = str(ROOT / ".gfn-profile")
+            kw = dict(headless=self.headless, viewport={"width": 1280, "height": 720},
+                      args=["--disable-blink-features=AutomationControlled"],
+                      ignore_default_args=["--enable-automation"])
+            try:
+                self._ctx = self._pw.chromium.launch_persistent_context(prof, channel="chrome", **kw)
+            except Exception:
+                self._ctx = self._pw.chromium.launch_persistent_context(prof, **kw)
+            self._ctx.add_init_script(GAMEPAD_INIT_JS)
+            self._page = self._ctx.pages[0] if self._ctx.pages else self._ctx.new_page()
+            if self.init_html is not None:        # loginless self-test game
+                import urllib.parse
+
+                self._page.goto("data:text/html;charset=utf-8," + urllib.parse.quote(self.init_html))
+            else:
+                self._page.goto(self.url, wait_until="domcontentloaded")
         self._page.wait_for_timeout(60)
         try:
             self._page.evaluate("window.__gpFireConnected && window.__gpFireConnected()")
@@ -429,7 +456,11 @@ class BrowserFrameSource:
                 self._cdp.send("Page.stopScreencast")
         except Exception:
             pass
-        for fn in (lambda: self._ctx and self._ctx.close(), lambda: self._pw and self._pw.stop()):
+        # When attached to the user's own Chrome, never close it — only disconnect.
+        closers = [lambda: self._pw and self._pw.stop()]
+        if not self._attached:
+            closers.insert(0, lambda: self._ctx and self._ctx.close())
+        for fn in closers:
             try:
                 fn()
             except Exception:
@@ -601,8 +632,12 @@ def _browser_test(args) -> int:
 def _gfn(args) -> int:
     """Open GeForce NOW with the dual-rate buffers + a viewable stream window; you
     log into NVIDIA + start a game, the agent gets video + screenshot buffers."""
-    buf = open_browser(args.url or None, headless=False, video_hz=args.video_hz, shot_hz=args.shot_hz)
-    print("▶ Opening GeForce NOW — log into NVIDIA + start a game in the window.")
+    buf = open_browser(args.url or None, headless=False, cdp_url=args.cdp or None,
+                       video_hz=args.video_hz, shot_hz=args.shot_hz)
+    if args.cdp:
+        print(f"▶ Attaching to your Chrome at {args.cdp} (already logged into GFN).")
+    else:
+        print("▶ Opening GeForce NOW — log into NVIDIA + start a game in the window.")
     print("  The agent reads a video buffer + screenshot buffer; watch the captured stream below.")
     drive_browser_in_background(buf, hz=6)
     serve(buf)            # view what the agent sees + /stats
@@ -622,6 +657,7 @@ def main() -> None:
     ap.add_argument("--browser-test", action="store_true", help="loginless: a browser game feeds the dual buffers")
     ap.add_argument("--gfn", action="store_true", help="open GeForce NOW with the dual buffers + stream window")
     ap.add_argument("--url", default="", help="override the browser URL (for --gfn)")
+    ap.add_argument("--cdp", default="", help="attach to your already-running Chrome, e.g. http://localhost:9222")
     args = ap.parse_args()
 
     if args.browser_test:
