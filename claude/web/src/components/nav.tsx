@@ -56,7 +56,7 @@ export function Nav() {
 function ThemeToggle() {
   const [theme, setTheme] = useState<string | null>(null);
   useEffect(() => {
-    setTheme(document.documentElement.getAttribute("data-theme") || "dark");
+    setTheme(document.documentElement.getAttribute("data-theme") || "light");
   }, []);
   function toggle() {
     const next = theme === "light" ? "dark" : "light";

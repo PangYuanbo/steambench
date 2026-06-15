@@ -34,11 +34,11 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* Set the theme before paint (no flash). Defaults to dark. */}
+        {/* Set the theme before paint (no flash). Defaults to light. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('sb_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();",
+              "(function(){try{var t=localStorage.getItem('sb_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();",
           }}
         />
         <Nav />
