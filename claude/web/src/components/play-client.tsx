@@ -163,6 +163,58 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
     };
   }, [isSnake, isSokoban, isTetris, isMinesweeper, isFlappy, isConnect4, isSlider, isForager, isRally, applyAction, forceDone]);
 
+  // Gamepad input: lets an agent (or a real controller) drive the SAME games via
+  // the standard Gamepad API — the path a simulated/injected pad uses. Discrete
+  // turn-based games (2048, Sokoban) edge-trigger one move per press, so a slow
+  // ~2s reaction is fine; held games steer while a direction is held. Polls with
+  // setInterval (runs in headless/automated Chrome, unlike throttled rAF).
+  useEffect(() => {
+    if (isMinesweeper || isConnect4) return;   // pointer-only for now
+    const prev: boolean[] = [];
+    const id = window.setInterval(() => {
+      if (forceDone || envRef.current?.done) return;
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      const gp = pads && pads[0];
+      if (!gp) return;
+      const b = gp.buttons.map((x) => x.pressed);
+      const ax = gp.axes;
+      const edge = (i: number) => !!b[i] && !prev[i];
+      // current held direction from d-pad (12-15) or left stick
+      let held: string | null = null;
+      if (b[14] || ax[0] < -0.5) held = "left";
+      else if (b[15] || ax[0] > 0.5) held = "right";
+      else if (b[12] || ax[1] < -0.5) held = "up";
+      else if (b[13] || ax[1] > 0.5) held = "down";
+
+      if (isSlider) {
+        dirRef.current = held === "left" ? "left" : held === "right" ? "right" : "stay";
+        if (isTurret && (edge(0) || edge(5) || edge(7))) fireQueuedRef.current = true;
+      } else if (isRally) {
+        dirRef.current = held === "up" ? "up" : held === "down" ? "down" : "stay";
+      } else if (isSnake || isForager) {
+        if (held) dirRef.current = held;
+        else if (isForager) dirRef.current = "stay";
+      } else if (isFlappy) {
+        if (edge(0) || edge(12)) applyAction("flap");
+      } else if (isTetris) {
+        if (edge(14)) applyAction("left");
+        if (edge(15)) applyAction("right");
+        if (edge(12)) applyAction("rotate");
+        if (edge(13)) applyAction("down");
+        if (edge(0)) applyAction("drop");
+      } else {
+        // discrete directional (2048, Sokoban): one move per d-pad edge
+        if (edge(12)) applyAction("up");
+        if (edge(13)) applyAction("down");
+        if (edge(14)) applyAction("left");
+        if (edge(15)) applyAction("right");
+        if (isSokoban && edge(1)) applyAction("restart");   // B = restart
+      }
+      for (let i = 0; i < b.length; i++) prev[i] = b[i];
+    }, 20);
+    return () => window.clearInterval(id);
+  }, [isSnake, isSokoban, isTetris, isMinesweeper, isFlappy, isConnect4, isSlider, isForager, isRally, isTurret, applyAction, forceDone]);
+
   // Tetris: a deterministic gravity tick injects "down" (recorded, so it
   // replay-verifies); key presses move/rotate/drop in between.
   useEffect(() => {
