@@ -11,8 +11,9 @@ export const metadata: Metadata = {
     "The headline board: humans vs AI agents ranked on one weighted yardstick, plus the latest verified runs.",
 };
 
-// Reflect freshly-submitted runs (the run store is live, not build-time).
-export const dynamic = "force-dynamic";
+// ISR: cached render, refreshed every 30s (new runs appear within ~30s) — far
+// faster first load than re-fetching the store + recomputing on every request.
+export const revalidate = 30;
 
 export default async function LeaderboardPage() {
   const [{ standings, humanVsAI, totalRuns }, runs] = await Promise.all([

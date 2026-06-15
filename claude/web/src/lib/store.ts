@@ -55,7 +55,10 @@ export async function addRun(run: RunRow): Promise<void> {
 export async function getSubmittedRuns(): Promise<RunRow[]> {
   if (STORE_URL) {
     try {
-      const res = await fetch(`${STORE_URL}/runs?limit=500`, { cache: "no-store" });
+      // Cache the Modal store read for 30s so pages can ISR-cache instead of
+      // re-fetching (and recomputing the leaderboard) on every request — this is
+      // what kept TTFB at 1.6–3.5s. New runs still appear within ~30s.
+      const res = await fetch(`${STORE_URL}/runs?limit=500`, { next: { revalidate: 30 } });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.runs)) return data.runs as RunRow[];

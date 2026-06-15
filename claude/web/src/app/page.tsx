@@ -3,8 +3,10 @@ import { getStats, getSummary, getLeaderboard, getSteamGames } from "@/lib/data"
 import { fmtNum } from "@/components/ui";
 import { Scoreboard } from "@/components/scoreboard";
 
-// Reflect freshly-submitted runs (the run store is live, not build-time).
-export const dynamic = "force-dynamic";
+// ISR: serve a cached render instantly, refresh in the background every 60s
+// (new runs appear within ~a minute). Avoids the per-request Modal fetch +
+// leaderboard recompute that made first load slow.
+export const revalidate = 60;
 
 export default async function Home() {
   const [stats, lb] = await Promise.all([getStats(), getLeaderboard()]);
