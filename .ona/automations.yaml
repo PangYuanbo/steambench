@@ -1,0 +1,60 @@
+services:
+  web:
+    name: SteamBench web
+    description: Next.js development server for the SteamBench web app.
+    triggeredBy:
+      - manual
+    commands:
+      start: cd claude/web && npm run dev -- --hostname 0.0.0.0
+      ready: curl -sf http://localhost:3000 > /dev/null
+
+tasks:
+  install-dependencies:
+    name: Install dependencies
+    description: Install locked web dependencies and Python test dependencies in the documented virtualenv.
+    triggeredBy:
+      - prebuild
+      - postDevcontainerStart
+    command: |
+      cd claude/web && npm ci
+      cd ../engine
+      python -m venv .venv
+      .venv/bin/python -m pip install -e ".[dev]" -e "../harness[dev]"
+
+  test-python:
+    name: Run Python tests
+    description: Run the engine and harness pytest suites.
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install-dependencies
+    command: |
+      cd claude/engine && .venv/bin/python -m pytest
+      cd ../harness && PYTHONPATH=. ../engine/.venv/bin/python -m pytest
+
+  test-web:
+    name: Run web tests
+    description: Run the TypeScript arcade and scoring tests.
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install-dependencies
+    command: cd claude/web && npm test
+
+  lint-web:
+    name: Lint web
+    description: Run the Next.js ESLint configuration.
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install-dependencies
+    command: cd claude/web && npm run lint
+
+  build-web:
+    name: Build web
+    description: Build the Next.js application.
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install-dependencies
+    command: cd claude/web && npm run build
