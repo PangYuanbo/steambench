@@ -1,0 +1,15 @@
+{
+  "name": "SteamBench",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/node": {},
+    "ghcr.io/devcontainers/features/python": {}
+  },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "SteamBench web",
+      "onAutoForward": "notify"
+    }
+  }
+}
