@@ -125,6 +125,38 @@ after a real GFN session establishes WebRTC, accepts gamepad input, delivers
 stable agent frames, records a valid 30 FPS video, and restarts without
 damaging the protected login state.
 
+## Linux VM runtime
+
+Modal's container network is the only known blocker, not the Runtime Browser.
+The same `runtime_browser_server.py` on a normal Ubuntu VM produced host and
+server-reflexive ICE candidates while preserving the full runtime contract.
+
+Prepare an Ubuntu 24.04 host once:
+
+```bash
+sudo apt-get install chromium-browser xvfb openbox x11vnc novnc websockify ffmpeg python3-venv
+sudo mkdir -p /root/runtime-browser
+sudo python3 -m venv /root/runtime-browser/venv
+sudo /root/runtime-browser/venv/bin/pip install playwright==1.60.0 pillow mss
+```
+
+Then run it without exposing control ports publicly:
+
+```bash
+python runtime/ssh_runtime_browser.py start HOST
+python runtime/ssh_runtime_browser.py status
+python runtime/ssh_runtime_browser.py check
+python runtime/ssh_runtime_browser.py tunnel  # separate terminal
+# API: http://127.0.0.1:8765; Live View: http://127.0.0.1:6080/vnc.html
+python runtime/ssh_runtime_browser.py stop
+```
+
+Measured on a two-vCPU Ubuntu VM at `1280x720`: 120 unique frames at `60.46
+FPS`, exactly 300 H.264 frames in 10 seconds, working mouse/keyboard/gamepad and
+trusted fullscreen, plus complete WebRTC ICE gathering. A real logged-in GFN
+game remains the final acceptance test. Use an Oregon VM for production latency;
+the test host was in Massachusetts.
+
 This is the step-by-step to take an AI agent from the deterministic arcade to a
 **real Steam game streamed through GeForce NOW**, scored on the same leaderboard
 as humans. The platform is already built — the agent, the gamepad action space,

@@ -49,6 +49,7 @@ def start(timeout: int):
         "vnc_password": vnc_password,
     }
     STATE.write_text(json.dumps(state, indent=2) + "\n")
+    STATE.chmod(0o600)
     print(json.dumps(state, indent=2))
 
 

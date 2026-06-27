@@ -44,6 +44,7 @@ GAMEPAD_INIT_JS = r"""
 
 class Runtime:
     def __init__(self, profile: str, width: int, height: int, capture_hz: int, record_hz: int):
+        self.profile = Path(profile)
         self.width, self.height = width, height
         self.capture_hz, self.record_hz = capture_hz, record_hz
         self.commands: queue.Queue = queue.Queue()
@@ -62,8 +63,8 @@ class Runtime:
         threading.Thread(target=self._capture, daemon=True).start()
 
     def _browser(self, profile: str):
-        state_path = Path(profile) / "storage-state.json"
-        previous_state = Path(profile) / "storage-state.previous.json"
+        state_path = self.profile / "storage-state.json"
+        previous_state = self.profile / "storage-state.previous.json"
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(
                 headless=False,
@@ -155,8 +156,8 @@ class Runtime:
         elif command == "tabs":
             return [{"index": index, "title": item.title(), "url": item.url} for index, item in enumerate(self.context.pages)]
         elif command == "shutdown":
-            Path("/profile").mkdir(parents=True, exist_ok=True)
-            self.context.storage_state(path="/profile/storage-state.json", indexed_db=True)
+            self.profile.mkdir(parents=True, exist_ok=True)
+            self.context.storage_state(path=str(self.profile / "storage-state.json"), indexed_db=True)
             self.running = False
         return {"url": page.url, "title": page.title()}
 
@@ -301,6 +302,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--profile", default="/profile")
+    parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
@@ -311,7 +313,7 @@ def main():
     runtime = Runtime(args.profile, args.width, args.height, args.capture_hz, args.record_hz)
     Handler.runtime = runtime
     Handler.token = args.token
-    ThreadingHTTPServer(("0.0.0.0", args.port), Handler).serve_forever()
+    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
 
 
 if __name__ == "__main__":

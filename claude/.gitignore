@@ -32,6 +32,7 @@ build/
 .gfn-dual.json
 .nitrogen-dual-play.json
 .runtime-browser.json
+.runtime-browser-vm.json
 
 # Local test data and recordings
 nitro_sample/
