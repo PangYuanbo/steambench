@@ -26,3 +26,6 @@ build/
 
 # Browser bridge: persistent Chrome profile for the GeForce NOW login
 .gfn-profile/
+.browserbase-gfn.json
+.browserbase-contexts.json
+.nitrogen-play.json

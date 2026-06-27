@@ -1,5 +1,47 @@
 # Connecting GeForce NOW
 
+## Canonical cloud runtime
+
+The production path is deliberately small:
+
+```text
+Browserbase Context (login gold copy)
+  -> disposable read-only Browserbase Session in us-west-2
+  -> Modal NitroGen on RTX PRO 6000 in AWS us-west-2
+  -> CDP screencast frames + injected W3C virtual gamepad
+```
+
+`runtime/browserbase_gfn.py` is the only lifecycle CLI. Browserbase Contexts are
+read-only by default so a bad refresh cannot corrupt the saved login. Use
+`--persist` only when intentionally refreshing authentication.
+
+```bash
+# One-time: record an existing healthy Context.
+BROWSERBASE_API_KEY=... python runtime/browserbase_gfn.py init --context-id CONTEXT_ID
+
+# Normal run: create a disposable session without writing back to the Context.
+BROWSERBASE_API_KEY=... python runtime/browserbase_gfn.py start --timeout 21600
+
+# Open the printed Live View, launch the game, then start the deployed agent.
+BROWSERBASE_API_KEY=... python runtime/browserbase_gfn.py agent-start --seconds 3500
+python runtime/browserbase_gfn.py agent-status
+
+# Stop compute first, then the disposable browser session.
+python runtime/browserbase_gfn.py agent-stop
+BROWSERBASE_API_KEY=... python runtime/browserbase_gfn.py stop
+```
+
+Deploy the policy from the Modal workspace that owns the GPU quota:
+
+```bash
+modal profile activate yuanbopang
+modal deploy runtime/modal_nitrogen.py
+```
+
+Fixed defaults: `1280x720`, JPEG quality `40`, four actions per observation,
+`55ms` pacing, and menu buttons masked. The older E2B/HTTP daemons remain
+diagnostic fallbacks, not the production path.
+
 This is the step-by-step to take an AI agent from the deterministic arcade to a
 **real Steam game streamed through GeForce NOW**, scored on the same leaderboard
 as humans. The platform is already built — the agent, the gamepad action space,
