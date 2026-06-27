@@ -152,7 +152,7 @@ class NitroGen:
 
     @modal.method()
     def play(self, daemon_url: str, seconds: float = 30.0, exec_frames: int = 6,
-             pace_ms: int = 55) -> dict:
+             pace_ms: int = 55, token: str = "") -> dict:
         """The glue loop, run ON the GPU container (predict is a local call =
         no inter-function hop): GET /frame from the E2B daemon -> NitroGen
         predict -> map the action chunk to /pad -> POST. Receding horizon:
@@ -164,6 +164,8 @@ class NitroGen:
 
         base = daemon_url.rstrip("/")
         s = requests.Session()
+        if token:
+            s.headers["Authorization"] = f"Bearer {token}"
         self.session.reset()
         end = time.time() + seconds
         steps, pads, infers = 0, 0, []
@@ -317,9 +319,10 @@ def main():
     if daemon:
         secs = float(os.environ.get("PLAY_SECONDS", "30"))
         ef = int(os.environ.get("EXEC_FRAMES", "6"))
+        token = os.environ.get("RUNTIME_BROWSER_TOKEN", "")
         print(f"NitroGen playing via {daemon} for {secs}s (exec_frames={ef})...")
         t = time.time()
-        r = ng.play.remote(daemon, secs, ef)
+        r = ng.play.remote(daemon, secs, ef, 55, token)
         print(f"done in {time.time()-t:.0f}s: {r}")
         return
     games = ng.list_games.remote()

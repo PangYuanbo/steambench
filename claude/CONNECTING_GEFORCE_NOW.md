@@ -73,6 +73,58 @@ runtime:
 These are compatibility requirements, not Browserbase-specific architecture.
 They are the acceptance checks for a future Modal-hosted browser runtime.
 
+## Modal runtime browser
+
+`runtime/modal_runtime_browser.py` is the minimal Browserbase-independent
+implementation. It keeps Chrome on an AWS Oregon CPU Sandbox, mounts login
+state and recordings on Modal Volumes, and exposes noVNC plus a bearer-token
+control API.
+
+```bash
+modal profile activate yuanbopang
+python runtime/modal_runtime_browser.py start --timeout 21600
+python runtime/modal_runtime_browser.py status
+python runtime/modal_runtime_browser.py download /recordings/runtime.mp4 output/runtime.mp4
+python runtime/modal_runtime_browser.py stop
+```
+
+The control API provides `/frame`, `/tabs`, `/goto`, `/tab`, `/reload`,
+`/back`, `/forward`, `/fullscreen`, `/mouse`, `/key`, `/pad`, `/cookies`,
+`/set_cookie`, `/record/start`, and `/record/stop`. Send the saved
+`api_token` as `Authorization: Bearer ...`. `/frame?after=N` blocks until a new
+frame exists and returns its sequence in `X-Frame-Id`.
+
+Verified on Modal AWS Oregon at `1280x720`:
+
+- X11 capture loop: `59.99-60.45 FPS`, including 120 consecutive unique frames.
+- H.264 recording: exact `30/1 FPS`; a 10.43-second run produced 313 frames.
+- Mouse, keyboard, W3C gamepad, multi-tab inspection, and trusted fullscreen.
+- GFN login wall rendering while the capture loop remained at about `60 FPS`.
+- Cookie state and recording files survived Sandbox stop/start via Modal
+  Volumes.
+
+The remaining live acceptance test is a logged-in GFN WebRTC game stream; the
+runtime is intentionally left independent from NitroGen GPU scheduling.
+
+Compatibility status against Browserbase:
+
+| Capability | Status | Evidence or remaining work |
+| --- | --- | --- |
+| Persistent login state | Partial | Playwright cookies and IndexedDB survive restarts through `storage-state.json`; a separate read-only gold-copy workflow is not implemented yet. |
+| Human Live View | Verified | Password-protected noVNC exposes the complete desktop rather than one CDP page target. |
+| Tabs and OAuth popups | Verified | `/tabs` lists every Playwright page and `/tab` brings a selected target forward. |
+| Trusted fullscreen | Verified | `/fullscreen` uses CDP `Runtime.evaluate` with `userGesture: true`. |
+| Mouse and keyboard | Verified | Runtime API input was exercised on a local test page. |
+| W3C virtual gamepad | Verified outside GFN | The injected pad was exercised on a local test page; a real streamed game still needs verification. |
+| Shared visual stream | Verified outside GFN | One X11 capture loop supplies unique 60 Hz frames and 30 FPS recording without starting multiple CDP screencasts. |
+| Real GFN WebRTC video | Blocked | The login wall renders, but Chromium in the Modal Sandbox has not produced ICE candidates, so a live game stream is not yet proven. |
+| Recovery and session protection | Not implemented | Network-error recovery, detached-target recovery, and disposable sessions cloned from a protected login snapshot remain required. |
+
+Do not treat login-wall FPS as live-game FPS. Browserbase can only be removed
+after a real GFN session establishes WebRTC, accepts gamepad input, delivers
+stable agent frames, records a valid 30 FPS video, and restarts without
+damaging the protected login state.
+
 This is the step-by-step to take an AI agent from the deterministic arcade to a
 **real Steam game streamed through GeForce NOW**, scored on the same leaderboard
 as humans. The platform is already built — the agent, the gamepad action space,
