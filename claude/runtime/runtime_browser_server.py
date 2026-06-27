@@ -71,8 +71,7 @@ class Runtime:
                 args=[
                     "--no-sandbox", "--disable-dev-shm-usage",
                     "--disable-blink-features=AutomationControlled",
-                    "--disable-features=WebRtcHideLocalIpsWithMdns,NetworkServiceSandbox",
-                    "--disable-network-service-sandbox",
+                    "--disable-features=WebRtcHideLocalIpsWithMdns",
                     "--force-webrtc-ip-handling-policy=default",
                     "--autoplay-policy=no-user-gesture-required",
                     "--window-position=0,0", f"--window-size={self.width},{self.height}",
@@ -82,6 +81,7 @@ class Runtime:
                 viewport={"width": self.width, "height": self.height},
                 storage_state=str(state_path if state_path.exists() else previous_state) if (state_path.exists() or previous_state.exists()) else None,
             )
+            self.context.grant_permissions(["camera", "microphone"], origin="https://play.geforcenow.com")
             self.context.add_init_script(GAMEPAD_INIT_JS)
             if not self.context.pages:
                 self.context.new_page()

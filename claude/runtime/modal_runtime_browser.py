@@ -65,7 +65,7 @@ def stop():
     process.wait()
     if process.returncode != 0:
         raise RuntimeError(process.stderr.read())
-    sandbox.terminate(wait=True)
+    sandbox.terminate()
     print(json.dumps({"stopped": state["sandbox_id"]}, indent=2))
 
 

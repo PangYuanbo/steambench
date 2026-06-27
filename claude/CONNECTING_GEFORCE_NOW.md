@@ -96,8 +96,8 @@ frame exists and returns its sequence in `X-Frame-Id`.
 
 Verified on Modal AWS Oregon at `1280x720`:
 
-- X11 capture loop: `59.99-60.45 FPS`, including 120 consecutive unique frames.
-- H.264 recording: exact `30/1 FPS`; a 10.43-second run produced 313 frames.
+- X11 capture loop: `59.86-60.45 FPS`, including 120 consecutive unique frames.
+- H.264 recording: exact `30/1 FPS`; a 10-second run produced exactly 300 frames.
 - Mouse, keyboard, W3C gamepad, multi-tab inspection, and trusted fullscreen.
 - GFN login wall rendering while the capture loop remained at about `60 FPS`.
 - Cookie state and recording files survived Sandbox stop/start via Modal
@@ -117,7 +117,7 @@ Compatibility status against Browserbase:
 | Mouse and keyboard | Verified | Runtime API input was exercised on a local test page. |
 | W3C virtual gamepad | Verified outside GFN | The injected pad was exercised on a local test page; a real streamed game still needs verification. |
 | Shared visual stream | Verified outside GFN | One X11 capture loop supplies unique 60 Hz frames and 30 FPS recording without starting multiple CDP screencasts. |
-| Real GFN WebRTC video | Blocked | The login wall renders, but Chromium in the Modal Sandbox has not produced ICE candidates, so a live game stream is not yet proven. |
+| Real GFN WebRTC video | Blocked | Raw UDP receives a valid Google STUN response, but Chromium and Firefox produce no ICE candidates in both Modal Sandbox and Function containers. Chromium receives an empty network list, so a live game stream is not yet proven. |
 | Recovery and session protection | Not implemented | Network-error recovery, detached-target recovery, and disposable sessions cloned from a protected login snapshot remain required. |
 
 Do not treat login-wall FPS as live-game FPS. Browserbase can only be removed
