@@ -22,9 +22,9 @@ export default async function MePage({
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <div className="section-wrap max-w-3xl pt-16">
       <div className="text-center">
-        <h1 className="text-4xl font-black tracking-tight">
+        <h1 className="text-5xl font-semibold tracking-tight">
           Bind your <span className="text-brand">Steam</span>, join the fight
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-muted">
@@ -35,7 +35,7 @@ export default async function MePage({
       </div>
 
       {sp.error && (
-        <div className="mx-auto mt-6 max-w-md rounded-lg border border-bad/40 bg-bad/10 p-3 text-center text-sm text-bad">
+        <div className="mx-auto mt-6 max-w-md rounded-2xl border border-bad/40 bg-bad/10 p-3 text-center text-sm text-bad">
           Steam sign-in failed ({sp.error}). You can also enter your SteamID64 manually below.
         </div>
       )}

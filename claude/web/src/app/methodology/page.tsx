@@ -60,14 +60,14 @@ export default async function MethodologyPage() {
   return (
     <div>
       {/* ---------------- HERO ---------------- */}
-      <section className="relative overflow-hidden border-b border-border-soft">
+      <section className="page-hero">
         <div className="grid-faint pointer-events-none absolute inset-0 opacity-60" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-16 sm:px-6 sm:pt-20">
+        <div className="page-hero-inner relative">
           <div className="mx-auto max-w-3xl text-center">
             <span className="chip mx-auto">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" /> the science
             </span>
-            <h1 className="mt-5 text-balance text-4xl font-black leading-[1.07] tracking-tight sm:text-5xl">
+            <h1 className="page-title mx-auto mt-5 text-balance">
               How SteamBench scores <span className="text-gradient">everything</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-pretty text-lg text-muted">
@@ -95,7 +95,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- RARITY -> BITS ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <section className="section-wrap">
         <SectionHeading kicker="Step 1" title="Rarity → bits" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -163,7 +163,7 @@ export default async function MethodologyPage() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border-soft text-left text-xs uppercase tracking-wider text-faint">
+                  <tr className="border-b border-border-soft text-left text-xs uppercase tracking-[0.14em] text-faint">
                     <th className="pb-2 pr-3 font-medium">Unlock %</th>
                     <th className="pb-2 pr-3 text-right font-medium">Bits</th>
                     <th className="pb-2 pr-3 text-right font-medium">Points</th>
@@ -192,7 +192,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- TIERS ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Step 2" title="Six difficulty tiers" />
         <div className="card p-6">
           <p className="text-muted">
@@ -242,7 +242,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- POINTS & MASTERY ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Step 3" title="Points &amp; mastery" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -305,7 +305,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- TASK SUITABILITY (TAXONOMY) ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Step 4" title="Which achievements actually test skill?" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -359,7 +359,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- HUMANS VS AI ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Step 5" title="Humans vs AI: Elo" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -396,14 +396,14 @@ export default async function MethodologyPage() {
             </p>
             <div className="mt-4 grid gap-3">
               <div className="rounded-lg border border-border-soft bg-bg-soft p-3">
-                <div className="text-xs font-semibold uppercase tracking-wider text-brand">Points · absolute</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-brand">Points · absolute</div>
                 <div className="mt-1 text-sm text-muted">
                   Total rare difficulty conquered. Grows the more you play; great
                   for &ldquo;how strong is this player overall.&rdquo;
                 </div>
               </div>
               <div className="rounded-lg border border-border-soft bg-bg-soft p-3">
-                <div className="text-xs font-semibold uppercase tracking-wider text-accent">Elo · relative</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Elo · relative</div>
                 <div className="mt-1 text-sm text-muted">
                   Head-to-head skill on shared games, immune to who attempted
                   more titles. This is the headline{" "}
@@ -421,7 +421,7 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- VERIFICATION ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Step 6" title="Verification: scores you can&apos;t fake" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -502,11 +502,11 @@ export default async function MethodologyPage() {
       </section>
 
       {/* ---------------- CTA ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="section-wrap">
         <div className="card relative overflow-hidden p-8 text-center sm:p-12">
           <div className="grid-faint pointer-events-none absolute inset-0 opacity-40" />
           <div className="relative">
-            <h3 className="text-3xl font-black tracking-tight">Put the model to the test.</h3>
+            <h3 className="text-3xl font-semibold tracking-tight">Put the model to the test.</h3>
             <p className="mx-auto mt-3 max-w-xl text-muted">
               The whole pipeline is open: rarity in, bits out, replay-verified
               scores on one ladder. Build an agent or bind your Steam and see

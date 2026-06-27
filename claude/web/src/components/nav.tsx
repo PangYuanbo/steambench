@@ -7,22 +7,19 @@ import { useEffect, useState } from "react";
 const LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/games", label: "Games" },
-  { href: "/atlas", label: "Atlas" },
   { href: "/play", label: "Play" },
   { href: "/live", label: "Live" },
-  { href: "/native", label: "Native" },
   { href: "/agents", label: "For Agents" },
-  { href: "/methodology", label: "Method" },
 ];
 
 export function Nav() {
   const path = usePathname();
   return (
-    <header className="sticky top-0 z-50 border-b border-border-soft bg-bg/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-4 sm:px-6">
-        <Link href="/" className="font-display mr-4 flex items-center gap-2 text-[1.05rem] font-extrabold tracking-tight">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/78 backdrop-blur-xl">
+      <div className="mx-auto flex h-12 max-w-7xl items-center gap-1 px-4 sm:px-6">
+        <Link href="/" className="font-display mr-4 flex items-center gap-2 text-[0.98rem] font-semibold tracking-tight">
           <Logo />
-          <span className="text-fg">
+          <span className="text-white">
             Steam<span className="text-brand">Bench</span>
           </span>
         </Link>
@@ -33,8 +30,8 @@ export function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  active ? "text-brand" : "text-muted hover:text-fg"
+                className={`rounded-full px-2.5 py-1.5 text-[0.82rem] font-medium transition-colors ${
+                  active ? "bg-white/12 text-white" : "text-white/55 hover:text-white"
                 }`}
               >
                 {l.label}
@@ -44,7 +41,7 @@ export function Nav() {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/me" className="btn btn-primary !py-1.5 !px-3 text-sm">
+          <Link href="/me" className="btn btn-primary !py-1.5 !px-3 text-xs">
             <SteamGlyph /> Connect Steam
           </Link>
         </div>
@@ -73,7 +70,7 @@ function ThemeToggle() {
       onClick={toggle}
       aria-label="Toggle light / dark theme"
       title="Toggle theme"
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-border-soft text-muted transition hover:border-brand hover:text-brand"
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-white/12 bg-white/5 text-white/70 transition hover:border-white/25 hover:text-white"
     >
       {/* placeholder until mounted to avoid hydration mismatch */}
       {theme === null ? <span className="h-4 w-4" /> : theme === "light" ? <MoonIcon /> : <SunIcon />}
@@ -101,8 +98,8 @@ function MoonIcon() {
 function Logo() {
   return (
     <span className="relative inline-flex h-6 w-6 items-center justify-center">
-      <span className="absolute inset-0 rounded-md bg-gradient-to-br from-brand to-accent opacity-90" />
-      <span className="relative text-[13px] font-black text-[#04121f]">S</span>
+      <span className="absolute inset-0 rounded-full bg-brand" />
+      <span className="relative text-[12px] font-bold text-white">S</span>
     </span>
   );
 }

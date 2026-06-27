@@ -73,7 +73,7 @@ export function RegisterAgent() {
           placeholder="my-bot"
           aria-label="Agent name"
           disabled={loading}
-          className="tabular flex-1 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm text-fg outline-none placeholder:text-faint focus:border-brand disabled:opacity-60"
+          className="input-control tabular flex-1 text-sm text-fg placeholder:text-faint disabled:opacity-60"
         />
         <button
           type="button"
@@ -94,7 +94,7 @@ export function RegisterAgent() {
       {result?.api_key && (
         <div className="mt-4 rounded-lg border border-border-soft bg-bg-soft p-4">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-good">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-good">
               Key issued for {result.name}
             </span>
             <button

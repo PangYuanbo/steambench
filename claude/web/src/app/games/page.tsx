@@ -43,17 +43,17 @@ export default async function GamesPage() {
   return (
     <div>
       {/* ---------------- HEADER / SUMMARY ---------------- */}
-      <section className="relative overflow-hidden border-b border-border-soft">
+      <section className="page-hero">
         <div className="grid-faint pointer-events-none absolute inset-0 opacity-50" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-6">
+        <div className="page-hero-inner relative">
           <div className="max-w-2xl">
-            <div className="text-xs font-semibold uppercase tracking-wider text-brand">
+            <div className="page-kicker">
               The catalog
             </div>
-            <h1 className="mt-1 text-balance text-4xl font-black tracking-tight sm:text-5xl">
+            <h1 className="page-title text-balance">
               Browse the <span className="text-gradient">games</span>
             </h1>
-            <p className="mt-4 text-pretty text-muted">
+            <p className="page-copy text-pretty">
               {fmtNum(summary.num_games)} Steam titles and {arcade.length} playable
               arcade games, every achievement tiered by real global rarity.
             </p>
@@ -61,17 +61,17 @@ export default async function GamesPage() {
 
           <div className="mt-8 grid gap-4 lg:grid-cols-[repeat(2,minmax(0,12rem))_1fr]">
             <div className="card p-4">
-              <div className="text-xs font-medium uppercase tracking-wider text-faint">Steam games</div>
+              <div className="text-xs font-medium uppercase tracking-[0.14em] text-faint">Steam games</div>
               <div className="tabular mt-1 text-2xl font-bold text-brand">{fmtNum(summary.num_games)}</div>
               <div className="mt-0.5 text-xs text-muted">+ {arcade.length} arcade</div>
             </div>
             <div className="card p-4">
-              <div className="text-xs font-medium uppercase tracking-wider text-faint">Benchmark tasks</div>
+              <div className="text-xs font-medium uppercase tracking-[0.14em] text-faint">Benchmark tasks</div>
               <div className="tabular mt-1 text-2xl font-bold">{fmtNum(summary.total_tasks)}</div>
               <div className="mt-0.5 text-xs text-muted">achievements scored</div>
             </div>
             <div className="card p-4">
-              <div className="text-xs font-medium uppercase tracking-wider text-faint">
+              <div className="text-xs font-medium uppercase tracking-[0.14em] text-faint">
                 Difficulty distribution
               </div>
               <div className="mt-3 space-y-1.5">
@@ -100,7 +100,7 @@ export default async function GamesPage() {
 
       {/* ---------------- PLAYABLE NOW (arcade) ---------------- */}
       {arcade.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <section className="section-wrap">
           <SectionHeading kicker="No Steam required" title="Playable now">
             <Link href="/play" className="btn">
               Open the arcade →
@@ -115,7 +115,7 @@ export default async function GamesPage() {
       )}
 
       {/* ---------------- STEAM GRID ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 pt-2 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Real Steam data" title="All Steam games">
           <span className="chip">{steam.length} titles</span>
         </SectionHeading>
@@ -137,7 +137,7 @@ function ArcadeCard({ game: g }: { game: Game }) {
         />
       ) : (
         <div className="grid-faint flex h-32 w-full items-center justify-center bg-bg-soft">
-          <span className="text-2xl font-black text-faint">{g.name.slice(0, 2)}</span>
+          <span className="text-2xl font-semibold text-faint">{g.name.slice(0, 2)}</span>
         </div>
       )}
       <div className="p-4">
@@ -164,4 +164,3 @@ function ArcadeCard({ game: g }: { game: Game }) {
     </Link>
   );
 }
-

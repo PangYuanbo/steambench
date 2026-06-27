@@ -7,7 +7,7 @@ export const metadata = { title: "Play the Arcade — SteamBench" };
 export default function PlayIndex() {
   const games = getArcadeGames();
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <div className="section-wrap pt-14">
       <SectionHeading kicker="No Steam required" title="Play the SteamBench Arcade">
         <Link href="/leaderboard" className="btn">Leaderboard →</Link>
       </SectionHeading>

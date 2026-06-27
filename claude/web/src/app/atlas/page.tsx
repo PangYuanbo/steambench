@@ -21,10 +21,10 @@ export default function AtlasPage() {
   const TYPE_ORDER: TaskType[] = ["skill", "misc", "progression", "grind", "social"];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <div className="section-wrap pt-14">
       {/* hero */}
-      <div className="text-xs font-semibold uppercase tracking-wider text-accent">The difficulty atlas</div>
-      <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">The hardest things on Steam</h1>
+      <div className="page-kicker">The difficulty atlas</div>
+      <h1 className="page-title">The hardest things on Steam</h1>
       <p className="mt-3 max-w-3xl text-muted">
         Every achievement across {totalGames} games, poured onto one
         information-theoretic scale: <code className="rounded bg-bg-soft px-1.5 py-0.5 text-sm">difficulty = −log₂(rarity)</code>{" "}
@@ -40,7 +40,7 @@ export default function AtlasPage() {
       </div>
 
       {/* tier population */}
-      <section className="mt-14">
+      <section className="mt-16">
         <SectionHeading kicker="Population" title="Every achievement, by difficulty tier" />
         <div className="card space-y-2.5 p-5">
           {TIER_ORDER.map((t) => {
@@ -68,7 +68,7 @@ export default function AtlasPage() {
       </section>
 
       {/* benchmark-grade taxonomy — which achievements actually test skill */}
-      <section className="mt-14">
+      <section className="mt-16">
         <SectionHeading kicker="Task design" title="Which achievements make good benchmark tasks?" />
         <div className="card p-5">
           <p className="text-sm text-muted">
@@ -126,7 +126,7 @@ export default function AtlasPage() {
       </section>
 
       {/* rarest achievements */}
-      <section className="mt-14">
+      <section className="mt-16">
         <SectionHeading kicker="The wall of pain" title={`The ${rarest.length} rarest achievements on Steam`}>
           <span className="text-xs text-faint">click through to the game</span>
         </SectionHeading>
@@ -161,7 +161,7 @@ export default function AtlasPage() {
       </section>
 
       {/* hardest games to 100% */}
-      <section className="mt-14">
+      <section className="mt-16">
         <SectionHeading kicker="Completionist's graveyard" title="Hardest games to 100%">
           <Link href="/games" className="btn">Browse all games →</Link>
         </SectionHeading>

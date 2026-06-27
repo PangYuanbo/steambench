@@ -97,15 +97,15 @@ export default async function GameDetailPage({
   return (
     <div>
       {/* ---------------- HEADER ---------------- */}
-      <section className="relative overflow-hidden border-b border-border-soft">
+      <section className="page-hero">
         {game.header_image && (
           <div className="absolute inset-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={game.header_image} alt="" className="h-full w-full object-cover opacity-20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/80 to-bg/40" />
+            <div className="absolute inset-0 bg-bg/80" />
           </div>
         )}
-        <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6">
+        <div className="page-hero-inner relative">
           <Link href="/games" className="text-sm text-muted hover:text-brand">
             ← All games
           </Link>
@@ -117,7 +117,7 @@ export default async function GameDetailPage({
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-balance text-3xl font-black tracking-tight sm:text-4xl">
+              <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
                 {game.name}
               </h1>
               {game.genres.length > 0 && (
@@ -170,7 +170,7 @@ export default async function GameDetailPage({
 
       {/* ---------------- WHO LEADS THIS GAME ---------------- */}
       {hasRuns && (
-        <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
+        <section className="section-wrap pt-2">
           <SectionHeading kicker="Humans vs AI" title={`Who leads ${game.name}`} />
           <div className="mx-auto max-w-2xl">
             <GameVersus humanBest={humanBest} aiBest={aiBest} />
@@ -179,7 +179,7 @@ export default async function GameDetailPage({
       )}
 
       {/* ---------------- DIFFICULTY LADDER ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <section className="section-wrap">
         <SectionHeading kicker="Hardest first" title="The difficulty ladder">
           <span className="chip">rarity → bits → points</span>
         </SectionHeading>
@@ -219,7 +219,7 @@ export default async function GameDetailPage({
           </div>
         ) : (
           <div className="card overflow-hidden">
-            <div className="hidden border-b border-border-soft bg-bg-soft px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-faint md:grid md:grid-cols-[7rem_1fr_5rem_5rem_5rem] md:items-center md:gap-3">
+            <div className="hidden border-b border-border-soft bg-bg-soft px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-faint md:grid md:grid-cols-[7rem_1fr_5rem_5rem_5rem] md:items-center md:gap-3">
               <span>Tier</span>
               <span>Objective</span>
               <span className="text-right">Rarity</span>

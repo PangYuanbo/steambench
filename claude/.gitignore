@@ -29,3 +29,10 @@ build/
 .browserbase-gfn.json
 .browserbase-contexts.json
 .nitrogen-play.json
+.gfn-dual.json
+.nitrogen-dual-play.json
+
+# Local test data and recordings
+nitro_sample/
+output/
+agents-last-exam/

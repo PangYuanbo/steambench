@@ -39,9 +39,9 @@ export function Stat({
   accent?: string;
 }) {
   return (
-    <div className="card p-4">
-      <div className="text-xs font-medium uppercase tracking-wider text-faint">{label}</div>
-      <div className="tabular mt-1 text-2xl font-bold" style={accent ? { color: accent } : undefined}>
+    <div className="card p-5">
+      <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-faint">{label}</div>
+      <div className="tabular mt-1.5 text-2xl font-semibold" style={accent ? { color: accent } : undefined}>
         {value}
       </div>
       {sub != null && <div className="mt-0.5 text-xs text-muted">{sub}</div>}
@@ -110,9 +110,9 @@ export function SectionHeading({
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
         {kicker && (
-          <div className="text-xs font-semibold uppercase tracking-wider text-brand">{kicker}</div>
+          <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-brand">{kicker}</div>
         )}
-        <h2 className="mt-1 text-2xl font-bold tracking-tight">{title}</h2>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h2>
       </div>
       {children}
     </div>

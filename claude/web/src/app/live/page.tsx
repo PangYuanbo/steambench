@@ -104,9 +104,9 @@ export default function LivePage() {
   const unlockedSet = new Set(unlocked);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="section-wrap max-w-6xl pt-12">
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ai">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-ai">
           {status === "playing" ? (
             <>
               <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-bad text-bad" />
@@ -116,7 +116,7 @@ export default function LivePage() {
             "Live"
           )}
         </div>
-        <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Watch an AI play, move by move</h1>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">Watch an AI play, move by move</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           An AI agent plays a SteamBench arcade game in real time — every move
           and its one-line reasoning streamed straight from the server (an LLM
@@ -191,7 +191,7 @@ export default function LivePage() {
         {/* reasoning feed + achievements */}
         <div className="space-y-4">
           <div className="card p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">Reasoning feed</div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">Reasoning feed</div>
             <div ref={logRef} className="max-h-64 space-y-1.5 overflow-y-auto pr-1 text-sm">
               {log.length === 0 && <div className="text-faint">moves appear here…</div>}
               {log.map((l, i) => (
@@ -204,7 +204,7 @@ export default function LivePage() {
             </div>
           </div>
           <div className="card p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">
               Achievements · {unlockedSet.size}/{achievements.length}
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -236,7 +236,7 @@ export default function LivePage() {
               </div>
               <div className="mt-1 truncate text-xs text-ai">{r.agent_id}</div>
               <div className="mt-3 flex items-end justify-between">
-                <span className="tabular text-2xl font-black text-brand">{Math.round(r.score)}</span>
+                <span className="tabular text-2xl font-semibold text-brand">{Math.round(r.score)}</span>
                 <span className="text-xs text-faint">{r.unlocked.length} 🏆 · {r.earned_points} pts</span>
               </div>
             </div>

@@ -1,34 +1,28 @@
 @import "tailwindcss";
 
-/* ----------------------------------------------------------------------------
-   SteamBench — light, flat, minimal. White ground, near-black ink, ONE blue
-   accent, generous whitespace. The only second colours are the human(amber) ↔
-   AI(cyan) rivalry, used *only* on the scoreboard. No shadows, no gradients,
-   no boxes-everywhere — content is separated by space and hairlines.
----------------------------------------------------------------------------- */
+/* SteamBench — Apple-like flat system. Quiet neutrals, one blue accent,
+   generous whitespace, soft radii, and hairline separators. */
 
 @theme {
-  /* default = light */
   --color-bg: #ffffff;
-  --color-bg-soft: #f6f7f9;
+  --color-bg-soft: #f5f5f7;
   --color-surface: #ffffff;
-  --color-surface-2: #f4f5f7;
-  --color-border: #e8e9ec;
-  --color-border-soft: #f0f1f3;
-  --color-fg: #14171a;
-  --color-muted: #6b7177;
-  --color-faint: #a3a8ae;
+  --color-surface-2: #fbfbfd;
+  --color-border: #dcdde1;
+  --color-border-soft: #ececf0;
+  --color-fg: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-faint: #8e8e93;
 
-  --color-brand: #2563eb;   /* the single accent */
-  --color-brand-2: #1d4ed8;
-  --color-human: #c2680c;   /* amber — scoreboard only */
-  --color-ai: #0e7490;      /* cyan  — scoreboard only */
-  --color-accent: #2563eb;  /* unified with brand (mono + 1 accent) */
+  --color-brand: #0071e3;
+  --color-brand-2: #0066cc;
+  --color-human: #c46c19;
+  --color-ai: #087ea4;
+  --color-accent: #0071e3;
   --color-good: #16a34a;
   --color-warn: #ea580c;
   --color-bad: #dc2626;
 
-  /* difficulty tiers (kept, but rendered as flat dots/labels) */
   --color-tutorial: #0284c7;
   --color-easy: #16a34a;
   --color-medium: #ca8a04;
@@ -36,28 +30,27 @@
   --color-elite: #dc2626;
   --color-legendary: #7c3aed;
 
-  --font-sans: var(--font-sans-var), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-var), ui-monospace, SFMono-Regular, monospace;
-  --font-display: var(--font-display-var), var(--font-sans-var), ui-sans-serif, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Optional dark variant (toggle). Same flat system, dark palette. */
 :root[data-theme="dark"] {
-  --color-bg: #0b0d10;
-  --color-bg-soft: #14171c;
-  --color-surface: #111418;
-  --color-surface-2: #171b21;
-  --color-border: #242a31;
-  --color-border-soft: #1b2027;
-  --color-fg: #e8ebef;
-  --color-muted: #9aa3ad;
-  --color-faint: #5f6975;
+  --color-bg: #000000;
+  --color-bg-soft: #1c1c1e;
+  --color-surface: #111113;
+  --color-surface-2: #222226;
+  --color-border: #38383d;
+  --color-border-soft: #2a2a2f;
+  --color-fg: #f5f5f7;
+  --color-muted: #a1a1a6;
+  --color-faint: #68686d;
 
-  --color-brand: #66c0f4;
-  --color-brand-2: #3b82f6;
-  --color-human: #fbbf24;
-  --color-ai: #22d3ee;
-  --color-accent: #66c0f4;
+  --color-brand: #64b5ff;
+  --color-brand-2: #2997ff;
+  --color-human: #f0aa55;
+  --color-ai: #63d0ee;
+  --color-accent: #64b5ff;
   --color-tutorial: #7dd3fc;
   --color-easy: #4ade80;
   --color-medium: #facc15;
@@ -70,12 +63,10 @@ html {
   background: var(--color-bg);
   color-scheme: light;
 }
-:root[data-theme="dark"] {
-  color-scheme: dark;
-}
+:root[data-theme="dark"] { color-scheme: dark; }
 
 body {
-  background: var(--color-bg);   /* flat — no glows, no texture */
+  background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
   font-optical-sizing: auto;
@@ -83,63 +74,201 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+main {
+  background: var(--color-bg);
+}
+
 @layer base {
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 650;
+    letter-spacing: -0.035em;
   }
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
   }
 }
 
-::selection {
-  background: color-mix(in srgb, var(--color-brand) 18%, transparent);
-}
+::selection { background: color-mix(in srgb, var(--color-brand) 18%, transparent); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 8px; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 @layer components {
-  /* Flat panel — a hairline, no shadow, no gradient. Use sparingly. */
+  .hero-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(0, 113, 227, 0.18), transparent 34%),
+      #050507;
+    color: #f5f5f7;
+  }
+  .hero-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), transparent 18%),
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 34%);
+  }
+  .hero-stage-inner {
+    width: min(100% - 2rem, 82rem);
+    margin-inline: auto;
+    padding: clamp(4.5rem, 9vw, 7.5rem) 0 clamp(4.5rem, 8vw, 7rem);
+    text-align: center;
+  }
+  .hero-kicker {
+    color: rgba(245,245,247,0.65);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  .hero-title {
+    margin: 1rem auto 0;
+    max-width: 68rem;
+    font-size: clamp(4rem, 9vw, 8.8rem);
+    line-height: 0.9;
+    letter-spacing: -0.085em;
+    font-weight: 700;
+  }
+  .hero-title span {
+    color: transparent;
+    background: linear-gradient(100deg, #87ceff 0%, #2997ff 42%, #b491ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .hero-copy {
+    max-width: 42rem;
+    margin: 1.5rem auto 0;
+    color: rgba(245,245,247,0.68);
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    line-height: 1.6;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .hero-actions .btn {
+    border-color: rgba(255,255,255,0.18);
+    color: #f5f5f7;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+  }
+  .hero-actions .btn:hover { background: rgba(255,255,255,0.1); }
+  .hero-actions .btn-primary { background: #0071e3; border-color: #0071e3; }
+  .hero-actions .btn-primary:hover { background: #2997ff; border-color: #2997ff; }
+  .hero-summary {
+    margin-top: 2rem;
+    color: rgba(245,245,247,0.45);
+    font: 500 0.72rem/1.5 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .page-shell {
+    width: 100%;
+  }
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background:
+      radial-gradient(circle at 50% 0%, rgba(0,113,227,0.2), transparent 42%),
+      #050507;
+    color: #f5f5f7;
+  }
+  .page-hero-inner {
+    width: min(100% - 2rem, 80rem);
+    margin-inline: auto;
+    padding: 5rem 0 3.5rem;
+  }
+  .page-kicker {
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-brand);
+  }
+  .page-title {
+    max-width: 58rem;
+    margin-top: 0.55rem;
+    font-size: clamp(2.4rem, 5vw, 4.8rem);
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+  .page-copy {
+    max-width: 42rem;
+    margin-top: 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.65;
+  }
+  .page-hero .text-muted { color: rgba(245,245,247,0.68); }
+  .page-hero .text-faint { color: rgba(245,245,247,0.42); }
+  .page-hero .chip { background: rgba(255,255,255,0.08); color: rgba(245,245,247,0.7); }
+  .section-wrap {
+    width: min(100% - 2rem, 80rem);
+    margin-inline: auto;
+    padding-block: 3.5rem;
+  }
+  .surface-muted {
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 20px;
+  }
+  .input-control {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-soft);
+    color: var(--color-fg);
+    padding: 0.62rem 0.8rem;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .input-control:focus {
+    border-color: var(--color-brand);
+    background: var(--color-surface);
+  }
+  .code-panel {
+    overflow: hidden;
+    border: 1px solid var(--color-border-soft);
+    border-radius: 18px;
+    background: var(--color-bg-soft);
+  }
   .card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 14px;
+    border-radius: 20px;
   }
-  .card-hover {
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-  .card-hover:hover {
-    border-color: color-mix(in srgb, var(--color-fg) 22%, transparent);
-  }
-  /* Flat tag — no border, quiet. */
+  .card-hover { transition: border-color 0.15s ease, background 0.15s ease; }
+  .card-hover:hover { border-color: color-mix(in srgb, var(--color-fg) 20%, transparent); }
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    border-radius: 6px;
-    padding: 0.15rem 0.5rem;
-    font-size: 0.72rem;
-    font-weight: 500;
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 600;
     background: var(--color-bg-soft);
     color: var(--color-muted);
   }
-  /* Kept for compatibility — now a solid accent, not a gradient. */
-  .text-gradient {
-    color: var(--color-brand);
-  }
+  .text-gradient { color: var(--color-brand); }
   .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
+    border-radius: 999px;
+    padding: 0.58rem 1.05rem;
+    font-weight: 600;
     font-size: 0.9rem;
     border: 1px solid var(--color-border);
     background: transparent;
@@ -149,7 +278,7 @@ body {
   }
   .btn:hover {
     background: var(--color-bg-soft);
-    border-color: color-mix(in srgb, var(--color-fg) 22%, transparent);
+    border-color: color-mix(in srgb, var(--color-fg) 20%, transparent);
   }
   .btn-primary {
     background: var(--color-brand);
@@ -161,27 +290,20 @@ body {
     border-color: var(--color-brand-2);
     color: #ffffff;
   }
-  /* No background texture in the flat design — kept so pages don't break. */
-  .grid-faint {
-    background-image: none;
-  }
-  /* A hairline divider for separating content instead of boxing it. */
-  .rule {
-    border: 0;
-    border-top: 1px solid var(--color-border);
-  }
+  .grid-faint { background-image: none; }
+  .rule { border: 0; border-top: 1px solid var(--color-border); }
 }
 
-/* dark toggle: primary button wants dark ink on its lighter blue */
+@media (max-width: 640px) {
+  .page-hero-inner { padding: 3.5rem 0 2.75rem; }
+  .section-wrap { padding-block: 2.75rem; }
+}
+
 :root[data-theme="dark"] .btn-primary { color: #04121f; }
 
-/* ---- the one signature: human(amber) ↔ AI(cyan), scoreboard only -------- */
-.seam-duality { background: linear-gradient(90deg, var(--color-human), var(--color-ai)); }
-.rule-duality {
-  height: 1px; border: 0;
-  background: linear-gradient(90deg, transparent, var(--color-human), var(--color-ai), transparent);
-  opacity: 0.6;
-}
+/* Human and AI rivalry stays color-coded, but never uses gradients. */
+.seam-duality { background: var(--color-border); }
+.rule-duality { height: 1px; border: 0; background: var(--color-border); }
 
 .live-dot { position: relative; }
 .live-dot::after {
@@ -201,7 +323,6 @@ body {
   .animate-fade-in { animation: sb-fade-in 0.35s ease both; }
 }
 
-/* numbers: mono, lined, slashed-zero */
 .tabular {
   font-variant-numeric: tabular-nums slashed-zero;
   font-family: var(--font-mono);

@@ -173,9 +173,9 @@ export default function NativePage() {
   const kindsPresent = Array.from(new Set((perception?.items ?? []).map((it) => it.kind)));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="section-wrap max-w-6xl pt-12">
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
           {status === "playing" ? (
             <>
               <span className="live-dot inline-block h-1.5 w-1.5 rounded-full bg-bad text-bad" />
@@ -185,7 +185,7 @@ export default function NativePage() {
             "Native runtime · pixels"
           )}
         </div>
-        <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">An AI playing from raw pixels</h1>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">An AI playing from raw pixels</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           A real rendered game runs on a <span className="text-fg">Modal</span> runtime, and a vision
           agent reads each <span className="text-fg">rendered frame</span> — not structured state — then
@@ -324,7 +324,7 @@ export default function NativePage() {
 
         <div className="space-y-4">
           <div className="card p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">How it works</div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">How it works</div>
             <ol className="space-y-2 text-sm text-muted">
               <li><span className="text-fg">1.</span> Game renders an RGB frame on Modal.</li>
               <li><span className="text-fg">2.</span> Agent gets the <span className="text-fg">pixels</span> (PNG) and finds the paddle + items by colour.</li>
@@ -333,7 +333,7 @@ export default function NativePage() {
             </ol>
           </div>
           <div className="card p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">
               Achievements · {unlockedSet.size}/{achievements.length || 5}
             </div>
             <div className="space-y-1.5">

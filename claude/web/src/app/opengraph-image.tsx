@@ -26,7 +26,7 @@ export default function OG() {
             style={{
               width: 44, height: 44, borderRadius: 10, display: "flex",
               alignItems: "center", justifyContent: "center", color: "#04121f",
-              fontWeight: 900, background: "linear-gradient(135deg,#66c0f4,#a78bfa)",
+              fontWeight: 700, background: "#0071e3",
             }}
           >
             S

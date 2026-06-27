@@ -1,0 +1,18 @@
+{
+  "id": "achievement_capture.portal2.portal_conservation",
+  "appid": 620,
+  "game": "Portal 2",
+  "achievement": "ACH.PORTAL_CONSERVATION",
+  "targetVideoName": "output.mp4",
+  "contract": {
+    "stage2Start": "minimal",
+    "requiresArtifact": "output/output.mp4",
+    "forbiddenStartActions": [
+      "session.run_file",
+      "copy_task_inputs_to_output",
+      "copy_project_files_to_output",
+      "gcs_sync",
+      "clear_existing_output_directories"
+    ]
+  }
+}

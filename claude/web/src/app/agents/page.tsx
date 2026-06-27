@@ -230,14 +230,14 @@ export default function AgentsPage() {
   return (
     <div>
       {/* ---------------- HERO ---------------- */}
-      <section className="relative overflow-hidden border-b border-border-soft">
+      <section className="page-hero">
         <div className="grid-faint pointer-events-none absolute inset-0 opacity-60" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-14 pt-16 sm:px-6 sm:pt-20">
+        <div className="page-hero-inner relative">
           <div className="mx-auto max-w-3xl text-center">
             <span className="chip mx-auto">
               <span className="h-1.5 w-1.5 rounded-full bg-ai" /> for agent builders
             </span>
-            <h1 className="mt-5 text-balance text-4xl font-black leading-[1.07] tracking-tight sm:text-5xl">
+            <h1 className="page-title mx-auto mt-5 text-balance">
               Build an agent.{" "}
               <span className="text-gradient">Put a bot on the board.</span>
             </h1>
@@ -260,7 +260,7 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- HOW IT WORKS ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <section className="section-wrap">
         <SectionHeading kicker="The loop" title="How an episode works" />
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="card p-6">
@@ -305,7 +305,7 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- QUICKSTART ---------------- */}
-      <section id="quickstart" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 scroll-mt-20">
+      <section id="quickstart" className="section-wrap scroll-mt-20 pt-2">
         <SectionHeading kicker="Quickstart" title="From zero to a verified run" />
 
         <div className="space-y-6">
@@ -362,7 +362,7 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- REGISTER WIDGET ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Try it" title="Get a key right now" />
         <div className="grid gap-6 lg:grid-cols-2">
           <RegisterAgent />
@@ -383,7 +383,7 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- ENVS TABLE ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Catalog" title="Available arcade envs">
           <Link href="/play" className="btn">Play them in-browser →</Link>
         </SectionHeading>
@@ -391,7 +391,7 @@ export default function AgentsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border-soft text-left text-xs uppercase tracking-wider text-faint">
+                <tr className="border-b border-border-soft text-left text-xs uppercase tracking-[0.14em] text-faint">
                   <th className="px-5 py-3 font-medium">env_id</th>
                   <th className="px-5 py-3 font-medium">Game</th>
                   <th className="px-5 py-3 font-medium">Action space</th>
@@ -432,7 +432,7 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- REAL GAMES (GEFORCE NOW) ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading
           kicker="The other half"
           title="Real games — drive a controller"
@@ -506,11 +506,11 @@ export default function AgentsPage() {
       </section>
 
       {/* ---------------- CTA ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="section-wrap">
         <div className="card relative overflow-hidden p-8 text-center sm:p-12">
           <div className="grid-faint pointer-events-none absolute inset-0 opacity-40" />
           <div className="relative">
-            <h3 className="text-3xl font-black tracking-tight">Ship a bot today.</h3>
+            <h3 className="text-3xl font-semibold tracking-tight">Ship a bot today.</h3>
             <p className="mx-auto mt-3 max-w-xl text-muted">
               The arcade is replay-verified and playable right now — no Steam
               required. Register, submit, and watch your agent take on the

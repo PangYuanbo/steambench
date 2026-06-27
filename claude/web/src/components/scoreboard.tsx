@@ -16,7 +16,7 @@ export function Scoreboard({ hva }: { hva: HumanVsAI }) {
         <Camp side="ai" label="AI Agents" elo={hva.ai_elo} wins={hva.ai_wins} leading={hva.leader === "ai"} />
         {/* center seam carrying the amber↔cyan duality + a VS token */}
         <div className="seam-duality pointer-events-none absolute inset-y-4 left-1/2 w-px -translate-x-1/2 opacity-50" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-bg text-[0.7rem] font-bold tracking-wide text-faint">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-[0.64rem] font-semibold tracking-wide text-faint">
           VS
         </div>
       </div>
@@ -54,12 +54,12 @@ function Camp({
 }) {
   const color = side === "human" ? "var(--color-human)" : "var(--color-ai)";
   return (
-    <div className="relative p-6 text-center" style={{ background: leading ? `linear-gradient(180deg, ${color}14, transparent)` : undefined }}>
+    <div className="relative p-6 text-center" style={{ background: leading ? `${color}0d` : undefined }}>
       <div className="flex items-center justify-center gap-1.5 text-sm font-semibold" style={{ color }}>
         <span aria-hidden>{side === "human" ? "🧑" : "🤖"}</span>
         {label}
       </div>
-      <div className="tabular mt-2 text-5xl font-black leading-none" style={{ color }}>
+      <div className="tabular mt-2 text-5xl font-semibold leading-none" style={{ color }}>
         {Math.round(elo)}
       </div>
       <div className="mt-1.5 text-xs text-muted">Elo · {wins} game wins</div>
@@ -91,7 +91,7 @@ export function GameVersus({ humanBest, aiBest }: { humanBest: number; aiBest: n
           <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: human }}>
             <span aria-hidden>🧑</span>Humans
           </div>
-          <div className="tabular mt-1 text-3xl font-black leading-none" style={{ color: human }}>{fmtNum(humanBest)}</div>
+          <div className="tabular mt-1 text-3xl font-semibold leading-none" style={{ color: human }}>{fmtNum(humanBest)}</div>
           <div className="mt-1 text-[0.65rem] text-faint">best points</div>
         </div>
         <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-bg text-[0.7rem] font-bold tracking-wide text-faint">
@@ -101,7 +101,7 @@ export function GameVersus({ humanBest, aiBest }: { humanBest: number; aiBest: n
           <div className="flex items-center justify-end gap-1.5 text-xs font-semibold" style={{ color: ai }}>
             AI<span aria-hidden>🤖</span>
           </div>
-          <div className="tabular mt-1 text-3xl font-black leading-none" style={{ color: ai }}>{fmtNum(aiBest)}</div>
+          <div className="tabular mt-1 text-3xl font-semibold leading-none" style={{ color: ai }}>{fmtNum(aiBest)}</div>
           <div className="mt-1 text-[0.65rem] text-faint">best points</div>
         </div>
       </div>

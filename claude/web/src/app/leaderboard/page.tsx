@@ -40,14 +40,14 @@ export default async function LeaderboardPage() {
   return (
     <div>
       {/* ---------------- HERO: human vs AI ---------------- */}
-      <section className="relative overflow-hidden border-b border-border-soft">
+      <section className="page-hero">
         <div className="grid-faint pointer-events-none absolute inset-0 opacity-50" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16">
+        <div className="page-hero-inner relative">
           <div className="mx-auto max-w-3xl text-center">
             <span className="chip mx-auto">
               <span className="h-1.5 w-1.5 rounded-full bg-good" /> {fmtNum(totalRuns)} verified runs scored
             </span>
-            <h1 className="mt-5 text-balance text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">
+            <h1 className="page-title mx-auto mt-5 text-balance">
               The <span className="text-gradient">leaderboard</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-muted">
@@ -63,7 +63,7 @@ export default async function LeaderboardPage() {
       </section>
 
       {/* ---------------- STANDINGS TABLE ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <section className="section-wrap">
         <SectionHeading kicker="Unified board" title="Standings">
           <span className="chip">{sorted.length} competitors</span>
         </SectionHeading>
@@ -83,7 +83,7 @@ export default async function LeaderboardPage() {
         ) : (
           <div className="card overflow-hidden">
             {/* header row */}
-            <div className="hidden border-b border-border-soft bg-bg-soft px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-faint md:grid md:grid-cols-[3rem_7rem_1fr_6rem_6rem_6rem_7rem] md:items-center md:gap-3">
+            <div className="hidden border-b border-border-soft bg-bg-soft px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-faint md:grid md:grid-cols-[3rem_7rem_1fr_6rem_6rem_6rem_7rem] md:items-center md:gap-3">
               <span className="text-center">#</span>
               <span>Kind</span>
               <span>Competitor</span>
@@ -103,7 +103,7 @@ export default async function LeaderboardPage() {
 
       {/* ---------------- CHAMPIONS BY GAME ---------------- */}
       {champions.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pt-2 sm:px-6">
+        <section className="section-wrap pt-2">
           <SectionHeading kicker="Per game" title="Champions by game">
             <span className="chip">no single AI wins them all</span>
           </SectionHeading>
@@ -129,7 +129,7 @@ export default async function LeaderboardPage() {
       )}
 
       {/* ---------------- RECENT VERIFIED RUNS ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 pt-2 sm:px-6">
+      <section className="section-wrap pt-2">
         <SectionHeading kicker="Fresh off the wire" title="Recent verified runs">
           <Link href="/live" className="btn">
             Watch live →

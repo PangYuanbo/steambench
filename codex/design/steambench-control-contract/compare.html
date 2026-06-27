@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Steambench control contract UI candidates</title>
+    <style>
+      :root {
+        --bg: #f6f7f4;
+        --panel: #fff;
+        --text: #171d1b;
+        --muted: #6a716c;
+        --line: #dfe4dc;
+        --accent: #5f8d57;
+        --tile: 420px;
+        --cols: 2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      .shell { min-height: 100vh; padding: 20px; }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255,255,255,.88);
+        box-shadow: 0 18px 60px rgba(20,28,22,.1);
+        backdrop-filter: blur(18px);
+      }
+      h1 { margin: 0; font-size: 18px; line-height: 1.2; }
+      .sub { margin-top: 4px; color: var(--muted); font-size: 13px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+      .control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 38px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .dropzone {
+        margin: 18px 0;
+        padding: 18px;
+        border: 1px dashed #b9c7b5;
+        border-radius: 18px;
+        background: rgba(255,255,255,.62);
+      }
+      .dropzone.dragging { border-color: var(--accent); background: #edf5ea; }
+      .drop-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+      .drop-title { font-weight: 700; }
+      .drop-copy { margin-top: 4px; color: var(--muted); font-size: 13px; }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--accent);
+        border-radius: 12px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .button.secondary { background: #fff; color: #3f6f39; }
+      .path-tools { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 14px; }
+      textarea {
+        min-height: 58px;
+        resize: vertical;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #fff;
+        color: var(--text);
+      }
+      #fileInput { display: none; }
+      .section { margin-top: 24px; }
+      .section-title { display: flex; align-items: baseline; gap: 10px; margin: 0 0 12px; font-size: 15px; }
+      .section-count { color: var(--muted); font-size: 12px; font-weight: 500; }
+      .grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 16px; }
+      .card {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: 0 10px 36px rgba(20,28,22,.07);
+      }
+      .media {
+        display: grid;
+        place-items: center;
+        min-height: var(--tile);
+        background: #fbfcfa;
+      }
+      .media img {
+        display: block;
+        width: 100%;
+        max-height: var(--tile);
+        object-fit: contain;
+        cursor: zoom-in;
+      }
+      .meta { display: grid; gap: 6px; padding: 12px; }
+      .name {
+        overflow: hidden;
+        font-size: 13px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .path {
+        overflow: hidden;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .tag {
+        justify-self: start;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f0f3ee;
+        color: #3f6f39;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        padding: 24px;
+        background: rgba(10,12,10,.78);
+      }
+      .lightbox.open { display: grid; grid-template-rows: auto 1fr; gap: 12px; }
+      .lightbox-head { display: flex; align-items: center; justify-content: space-between; color: #fff; }
+      .lightbox-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .lightbox button {
+        border: 1px solid rgba(255,255,255,.35);
+        border-radius: 12px;
+        background: rgba(255,255,255,.12);
+        color: #fff;
+        cursor: pointer;
+        padding: 8px 12px;
+      }
+      .lightbox img {
+        align-self: center;
+        justify-self: center;
+        max-width: 100%;
+        max-height: calc(100vh - 96px);
+        object-fit: contain;
+      }
+      @media (max-width: 860px) {
+        .shell { padding: 12px; }
+        .topbar, .path-tools { grid-template-columns: 1fr; }
+        .controls { justify-content: flex-start; }
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>Steambench control contract UI candidates</h1>
+          <div class="sub" id="summary">Loading images...</div>
+        </div>
+        <div class="controls">
+          <label class="control">列数
+            <select id="cols">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <label class="control">图高
+            <input id="size" type="range" min="220" max="760" value="420" />
+          </label>
+        </div>
+      </header>
+      <section class="dropzone" id="dropzone">
+        <div class="drop-head">
+          <div>
+            <div class="drop-title">继续加图</div>
+            <div class="drop-copy">拖拽图片到这里，或选择本地图片。只在当前浏览器临时显示，不会改项目文件。</div>
+          </div>
+          <label class="button">选择图片<input id="fileInput" type="file" accept="image/*" multiple /></label>
+        </div>
+        <div class="path-tools">
+          <textarea id="pathInput" placeholder="也可以粘贴图片路径或 URL，一行一个。"></textarea>
+          <button class="button secondary" id="addPaths" type="button">加入对比</button>
+        </div>
+      </section>
+      <div id="sections"></div>
+    </main>
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lightboxTitle"></div>
+        <button type="button" id="closeLightbox">关闭</button>
+      </div>
+      <img id="lightboxImage" alt="" />
+    </div>
+    <script>
+      const imageGroups = [{"title": "step-00-agent-contract", "images": [{"name": "ig_049b13ba044ddfcd016a2ecd7c0a94819ba931d40a2f444ba0.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_049b13ba044ddfcd016a2ecd7c0a94819ba931d40a2f444ba0.png"}, {"name": "ig_049b13ba044ddfcd016a2ecdc1243c819b8816c209f79e967e.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_049b13ba044ddfcd016a2ecdc1243c819b8816c209f79e967e.png"}, {"name": "ig_049b13ba044ddfcd016a2ecdfaac8c819b84ba2d5472ee7d2e.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_049b13ba044ddfcd016a2ecdfaac8c819b84ba2d5472ee7d2e.png"}, {"name": "ig_049b13ba044ddfcd016a2ece3da548819b888f17be408e17c8.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_049b13ba044ddfcd016a2ece3da548819b888f17be408e17c8.png"}, {"name": "ig_0e7b2d64c72ba6f3016a2edf9d42248199b23fca1588b4b69e.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_0e7b2d64c72ba6f3016a2edf9d42248199b23fca1588b4b69e.png"}, {"name": "ig_0e7b2d64c72ba6f3016a2edfdc16748199b3c10091ba757822.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_0e7b2d64c72ba6f3016a2edfdc16748199b3c10091ba757822.png"}, {"name": "ig_0e7b2d64c72ba6f3016a2ee0212dbc819982f6abd0cefdf1c3.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_0e7b2d64c72ba6f3016a2ee0212dbc819982f6abd0cefdf1c3.png"}, {"name": "ig_0e7b2d64c72ba6f3016a2ee06d493881999d08e14f53ad64fe.png", "src": "/Users/aaronpang/Desktop/steambench/codex/design/steambench-control-contract/generated/step-00-agent-contract/ig_0e7b2d64c72ba6f3016a2ee06d493881999d08e14f53ad64fe.png"}]}];
+      const state = { extraImages: [] };
+      const root = document.documentElement;
+      const sectionsEl = document.querySelector("#sections");
+      const summaryEl = document.querySelector("#summary");
+      const colsEl = document.querySelector("#cols");
+      const sizeEl = document.querySelector("#size");
+      const dropzoneEl = document.querySelector("#dropzone");
+      const fileInputEl = document.querySelector("#fileInput");
+      const pathInputEl = document.querySelector("#pathInput");
+      const addPathsEl = document.querySelector("#addPaths");
+      const lightboxEl = document.querySelector("#lightbox");
+      const lightboxImageEl = document.querySelector("#lightboxImage");
+      const lightboxTitleEl = document.querySelector("#lightboxTitle");
+      const closeLightboxEl = document.querySelector("#closeLightbox");
+
+      function render() {
+        const groups = [...imageGroups];
+        if (state.extraImages.length) groups.push({ title: "临时加入", images: state.extraImages });
+        const total = groups.reduce((sum, group) => sum + group.images.length, 0);
+        summaryEl.textContent = `${total} 张图，可调列数、图高，点击图片可放大。`;
+        sectionsEl.innerHTML = "";
+        for (const group of groups) {
+          const section = document.createElement("section");
+          section.className = "section";
+          section.innerHTML = `<h2 class="section-title">${escapeHtml(group.title)} <span class="section-count">${group.images.length} 张</span></h2>`;
+          const grid = document.createElement("div");
+          grid.className = "grid";
+          for (const image of group.images) grid.appendChild(createCard(image, group.title));
+          section.appendChild(grid);
+          sectionsEl.appendChild(section);
+        }
+      }
+
+      function createCard(image, tag) {
+        const card = document.createElement("article");
+        card.className = "card";
+        const media = document.createElement("div");
+        media.className = "media";
+        const img = document.createElement("img");
+        img.src = image.src;
+        img.alt = image.name;
+        img.loading = "lazy";
+        img.addEventListener("click", () => openLightbox(image));
+        media.appendChild(img);
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `
+          <div class="name" title="${escapeHtml(image.name)}">${escapeHtml(image.name)}</div>
+          <div class="path" title="${escapeHtml(image.src)}">${escapeHtml(image.src)}</div>
+          <div class="tag">${escapeHtml(tag || "image")}</div>
+        `;
+        card.appendChild(media);
+        card.appendChild(meta);
+        return card;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function openLightbox(image) {
+        lightboxImageEl.src = image.src;
+        lightboxImageEl.alt = image.name;
+        lightboxTitleEl.textContent = image.name;
+        lightboxEl.classList.add("open");
+      }
+
+      function closeLightbox() {
+        lightboxEl.classList.remove("open");
+        lightboxImageEl.removeAttribute("src");
+      }
+
+      function addFiles(files) {
+        for (const file of files) {
+          if (!file.type.startsWith("image/")) continue;
+          state.extraImages.push({ name: file.name, src: URL.createObjectURL(file) });
+        }
+        render();
+      }
+
+      colsEl.addEventListener("change", () => root.style.setProperty("--cols", colsEl.value));
+      sizeEl.addEventListener("input", () => root.style.setProperty("--tile", `${sizeEl.value}px`));
+      fileInputEl.addEventListener("change", (event) => {
+        addFiles(event.target.files || []);
+        event.target.value = "";
+      });
+      dropzoneEl.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        dropzoneEl.classList.add("dragging");
+      });
+      dropzoneEl.addEventListener("dragleave", () => dropzoneEl.classList.remove("dragging"));
+      dropzoneEl.addEventListener("drop", (event) => {
+        event.preventDefault();
+        dropzoneEl.classList.remove("dragging");
+        addFiles(event.dataTransfer.files || []);
+      });
+      addPathsEl.addEventListener("click", () => {
+        const paths = pathInputEl.value.split("\n").map((line) => line.trim()).filter(Boolean);
+        for (const path of paths) state.extraImages.push({ name: path.split("/").pop() || path, src: path });
+        pathInputEl.value = "";
+        render();
+      });
+      closeLightboxEl.addEventListener("click", closeLightbox);
+      lightboxEl.addEventListener("click", (event) => {
+        if (event.target === lightboxEl) closeLightbox();
+      });
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeLightbox();
+      });
+      root.style.setProperty("--cols", colsEl.value);
+      root.style.setProperty("--tile", `${sizeEl.value}px`);
+      render();
+    </script>
+  </body>
+</html>

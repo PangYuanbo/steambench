@@ -42,6 +42,37 @@ Fixed defaults: `1280x720`, JPEG quality `40`, four actions per observation,
 `55ms` pacing, and menu buttons masked. The older E2B/HTTP daemons remain
 diagnostic fallbacks, not the production path.
 
+## Browser runtime compatibility contract
+
+Any Browserbase replacement must preserve the behavior proven by the current
+runtime:
+
+- Keep login state in a persistent profile, but run normal game sessions
+  read-only so a failed refresh cannot corrupt the saved account.
+- Expose every browser tab. Browserbase Live View URLs bind to a page target,
+  so OAuth popups require a new target URL instead of following automatically.
+- Support trusted fullscreen. GeForce NOW's `LET'S GO` overlay only cleared
+  reliably with CDP `Runtime.evaluate`, `userGesture: true`, and
+  `document.documentElement.requestFullscreen()`; ordinary clicks, `F11`, and
+  window fullscreen were insufficient.
+- Inject the W3C virtual gamepad before the stream starts and re-inject after
+  navigation. WebRTC video can receive the gamepad while ignoring CDP mouse
+  clicks inside the streamed game.
+- Own one long-lived CDP screencast and fan its frames out to inference,
+  recording, and Live View. Multiple or repeatedly restarted screencasts caused
+  long stalls.
+- Preserve full `1280x720` frames. From a Modal AWS Oregon sandbox, one warm
+  screencast delivered about `21-23 FPS` while receiving and H.264 encoding;
+  repeated streams later degraded to `1-4 FPS` with pauses up to `19s`.
+- Recover from GFN network errors, paused sessions, detached page targets, and
+  OAuth tabs without replacing the persistent login profile.
+- Keep the browser lifecycle independent from GPU scheduling. The browser must
+  remain usable while PRO 6000 is queued, and GPU cancellation must not destroy
+  login state.
+
+These are compatibility requirements, not Browserbase-specific architecture.
+They are the acceptance checks for a future Modal-hosted browser runtime.
+
 This is the step-by-step to take an AI agent from the deterministic arcade to a
 **real Steam game streamed through GeForce NOW**, scored on the same leaderboard
 as humans. The platform is already built — the agent, the gamepad action space,

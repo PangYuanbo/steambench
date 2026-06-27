@@ -335,7 +335,7 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
       {/* board */}
       <div className="card relative flex flex-col items-center justify-center p-6">
         {toast && (
-          <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-lg border bg-bg-soft px-4 py-2 text-sm font-semibold shadow-lg" style={{ color: "var(--color-medium)", borderColor: "var(--color-medium)55" }}>
+          <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-2xl border bg-bg-soft px-4 py-2 text-sm font-semibold" style={{ color: "var(--color-medium)", borderColor: "var(--color-medium)55" }}>
             {toast}
           </div>
         )}
@@ -430,11 +430,11 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs uppercase tracking-wider text-faint">Score</div>
-              <div className="tabular text-3xl font-black" style={{ color: "var(--color-human)" }}>{Math.round(score)}</div>
+              <div className="text-xs uppercase tracking-[0.14em] text-faint">Score</div>
+              <div className="tabular text-3xl font-semibold" style={{ color: "var(--color-human)" }}>{Math.round(score)}</div>
             </div>
             <div className="text-right">
-              <div className="text-xs uppercase tracking-wider text-faint">Steps</div>
+              <div className="text-xs uppercase tracking-[0.14em] text-faint">Steps</div>
               <div className="tabular text-xl font-bold">{obs?.step ?? 0}</div>
             </div>
           </div>
@@ -445,7 +445,7 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
         </div>
 
         <div className="card p-4">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-faint">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-faint">
             Achievements · {unlocked.size}/{spec.achievements.length}
           </div>
           <div className="max-h-72 space-y-1.5 overflow-y-auto pr-1">
@@ -471,8 +471,8 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="card w-full max-w-md p-6">
             <div className="text-center">
-              <div className="text-sm uppercase tracking-wider text-faint">{obs?.done ? "Game over" : "Submit run"}</div>
-              <div className="tabular mt-1 text-5xl font-black" style={{ color: "var(--color-human)" }}>{Math.round(score)}</div>
+              <div className="text-sm uppercase tracking-[0.14em] text-faint">{obs?.done ? "Game over" : "Submit run"}</div>
+              <div className="tabular mt-1 text-5xl font-semibold" style={{ color: "var(--color-human)" }}>{Math.round(score)}</div>
               <div className="mt-1 text-sm text-muted">
                 {unlocked.size}/{spec.achievements.length} achievements · {obs?.step} steps
               </div>
@@ -485,7 +485,7 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="your display name"
                   maxLength={32}
-                  className="w-full rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm outline-none focus:border-brand"
+                  className="input-control w-full text-sm"
                 />
                 <button className="btn btn-primary w-full justify-center" onClick={submit} disabled={submitState === "submitting"}>
                   {submitState === "submitting" ? "Verifying…" : "Submit to leaderboard"}
@@ -503,7 +503,7 @@ export function PlayClient({ envId, spec }: { envId: string; spec: EnvSpec }) {
               </div>
             ) : (
               <div className="mt-5 space-y-3 text-center">
-                <div className="rounded-lg border border-good/40 bg-good/10 p-3 text-sm text-good">{submitMsg}</div>
+                <div className="rounded-2xl border border-good/40 bg-good/10 p-3 text-sm text-good">{submitMsg}</div>
                 <Link href="/leaderboard" className="btn btn-primary w-full justify-center">See the leaderboard →</Link>
                 <button className="btn w-full justify-center" onClick={startGame}>Play again</button>
               </div>
@@ -519,7 +519,7 @@ function DPad({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="flex h-12 min-w-12 items-center justify-center rounded-xl border border-border-soft bg-surface-2 px-4 text-lg font-bold text-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition hover:border-brand hover:bg-surface hover:text-brand active:scale-95"
+      className="flex h-12 min-w-12 items-center justify-center rounded-2xl border border-border-soft bg-surface-2 px-4 text-lg font-semibold text-muted transition hover:border-brand hover:bg-surface hover:text-brand active:scale-95"
     >
       {label}
     </button>

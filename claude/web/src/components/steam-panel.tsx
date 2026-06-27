@@ -89,12 +89,12 @@ export function SteamPanel({
             value={steamid}
             onChange={(e) => setSteamid(e.target.value)}
             placeholder="SteamID64 (17 digits)"
-            className="tabular rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm outline-none focus:border-brand"
+            className="input-control tabular text-sm"
           />
           <select
             value={appid}
             onChange={(e) => setAppid(Number(e.target.value))}
-            className="rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm outline-none focus:border-brand"
+            className="input-control text-sm"
           >
             {games.map((g) => (
               <option key={g.appid} value={g.appid}>{g.name}</option>
@@ -122,7 +122,7 @@ export function SteamPanel({
               <div className="flex items-center gap-3">
                 {result.profile?.avatar && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={result.profile.avatar} alt="" className="h-12 w-12 rounded-lg" />
+                  <img src={result.profile.avatar} alt="" className="h-12 w-12 rounded-2xl" />
                 )}
                 <div className="flex-1">
                   <div className="font-semibold">{result.profile?.name}</div>
@@ -163,8 +163,8 @@ export function SteamPanel({
 
 function Metric({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-lg border border-border-soft bg-bg-soft p-3">
-      <div className="text-[0.65rem] uppercase tracking-wider text-faint">{label}</div>
+    <div className="rounded-2xl border border-border-soft bg-bg-soft p-3">
+      <div className="text-[0.65rem] uppercase tracking-[0.14em] text-faint">{label}</div>
       <div
         className="tabular mt-1 text-xl font-bold"
         style={{ color: accent ? "var(--color-human)" : "var(--color-fg)" }}

@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border-soft">
+    <footer className="border-t border-border-soft bg-bg-soft/60">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="font-bold">
+          <div className="font-display text-sm font-semibold">
             Steam<span className="text-brand">Bench</span>
           </div>
           <p className="mt-2 max-w-sm text-sm text-muted">
@@ -15,7 +15,7 @@ export function Footer() {
           </p>
         </div>
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-faint">
+          <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-faint">
             Explore
           </div>
           <ul className="mt-3 space-y-2 text-sm text-muted">
@@ -26,7 +26,7 @@ export function Footer() {
           </ul>
         </div>
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-faint">
+          <div className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-faint">
             Build
           </div>
           <ul className="mt-3 space-y-2 text-sm text-muted">

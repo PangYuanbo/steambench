@@ -53,14 +53,14 @@ export function SteamGrid({ games }: { games: GameCard[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search games or genres…"
-          className="min-w-0 flex-1 rounded-lg border border-border bg-bg-soft px-3 py-2 text-sm outline-none focus:border-brand"
+          className="input-control min-w-0 flex-1 text-sm"
         />
-        <div className="flex rounded-lg border border-border-soft bg-bg-soft p-1">
+        <div className="flex rounded-full border border-border-soft bg-bg-soft p-1">
           {SORTS.map((s) => (
             <button
               key={s.key}
               onClick={() => setSort(s.key)}
-              className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
+              className={`rounded-full px-2.5 py-1.5 text-xs font-medium transition ${
                 sort === s.key ? "bg-surface-2 text-brand" : "text-muted hover:text-fg"
               }`}
             >
@@ -102,7 +102,7 @@ function SteamCard({ game: g, highlightSkill }: { game: GameCard; highlightSkill
         />
       ) : (
         <div className="grid-faint flex h-32 w-full items-center justify-center bg-bg-soft">
-          <span className="text-2xl font-black text-faint">{g.name.slice(0, 2)}</span>
+          <span className="text-2xl font-semibold text-faint">{g.name.slice(0, 2)}</span>
         </div>
       )}
       <div className="p-4">

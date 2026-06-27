@@ -15,11 +15,11 @@ export default async function PlayGame({ params }: { params: Promise<{ game: str
   const spec = make(envId).spec();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="section-wrap max-w-6xl pt-12">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <Link href="/play" className="text-sm text-muted hover:text-brand">← Arcade</Link>
-          <h1 className="mt-1 text-3xl font-black tracking-tight">{spec.name}</h1>
+          <h1 className="mt-1 text-4xl font-semibold tracking-tight">{spec.name}</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">{spec.description}</p>
         </div>
         <span className="chip hidden sm:inline-flex">replay-verified</span>

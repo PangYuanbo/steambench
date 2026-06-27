@@ -16,7 +16,7 @@ export function Board2048({ state, size = 76 }: { state: Record<string, unknown>
       {board.flat().map((v, i) => (
         <div
           key={i}
-          className="tabular flex items-center justify-center rounded-lg font-black transition-colors"
+          className="tabular flex items-center justify-center rounded-lg font-semibold transition-colors"
           style={{
             width: size, height: size, fontSize: size * 0.27,
             background: v ? TILE_COLORS[v] ?? "#facc15" : "rgba(255,255,255,0.03)",
