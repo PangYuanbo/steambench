@@ -12,8 +12,10 @@ Modal GPU class (bypassing its interactive game picker) and expose predict().
     modal deploy runtime/modal_nitrogen.py         # persistent service for the glue
 """
 import io
+import json
 import os
 import time
+from pathlib import Path
 
 import modal
 
@@ -32,6 +34,24 @@ TOK2PAD = {
     'LEFT_TRIGGER': 6, 'RIGHT_TRIGGER': 7, 'BACK': 8, 'START': 9, 'LEFT_THUMB': 10,
     'RIGHT_THUMB': 11, 'DPAD_UP': 12, 'DPAD_DOWN': 13, 'DPAD_LEFT': 14, 'DPAD_RIGHT': 15, 'GUIDE': 16,
 }
+MENU_MASK = {"START", "BACK", "GUIDE"}
+
+
+def runtime_action(left, right, button_values):
+    """Map one NitroGen action to W3C; lock camera pitch to the horizon."""
+    axes = [float(left[0]), -float(left[1]), float(right[0]), 0.0]
+    buttons = [0.0] * 17
+    for index, token in enumerate(BUTTON_TOKENS):
+        if index < len(button_values) and button_values[index] > 0.5 and token in TOK2PAD and token not in MENU_MASK:
+            buttons[TOK2PAD[token]] = 1.0
+    return axes, buttons
+
+
+def append_action_log(path: str, payload: dict):
+    with open(path, "a", encoding="utf-8") as log:
+        log.write(json.dumps(payload, separators=(",", ":")) + "\n")
+        log.flush()
+        os.fsync(log.fileno())
 
 GAMEPAD_INIT_JS = r"""
 (() => {
@@ -57,6 +77,7 @@ GAMEPAD_INIT_JS = r"""
 
 # Persist the HF cache (SigLip2 vision encoder) across cold starts.
 hf_cache = modal.Volume.from_name("nitrogen-hf-cache", create_if_missing=True)
+action_logs = modal.Volume.from_name("nitrogen-action-logs", create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -90,7 +111,8 @@ image = (
 )
 
 
-@app.cls(gpu="RTX-PRO-6000", cloud="aws", region="us-west-2", image=image, volumes={"/cache/hf": hf_cache},
+@app.cls(gpu="RTX-PRO-6000", cloud="aws", region="us-west-2", image=image,
+         volumes={"/cache/hf": hf_cache, "/logs": action_logs},
          timeout=3600, scaledown_window=300)
 class NitroGen:
     @modal.enter()
@@ -167,6 +189,8 @@ class NitroGen:
         if token:
             s.headers["Authorization"] = f"Bearer {token}"
         self.session.reset()
+        Path("/logs").mkdir(parents=True, exist_ok=True)
+        log_path = f"/logs/runtime-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}.jsonl"
         end = time.time() + seconds
         steps, pads, infers = 0, 0, []
         while time.time() < end:
@@ -181,15 +205,14 @@ class NitroGen:
             jl = np.asarray(out["j_left"]).reshape(-1, 2)
             jr = np.asarray(out["j_right"]).reshape(-1, 2)
             bt = np.asarray(out["buttons"]).reshape(len(jl), -1)
-            for i in range(min(exec_frames, len(jl))):
-                # joysticks: NitroGen +y = up (vgamepad); W3C axis +y = down -> negate
-                axes = [float(jl[i][0]), -float(jl[i][1]), float(jr[i][0]), -float(jr[i][1])]
-                buttons = [0.0] * 17
-                bv = bt[i]
-                MENU_MASK = {"START", "BACK", "GUIDE"}  # don't let it open pause/rewind menus
-                for ti, tok in enumerate(BUTTON_TOKENS):
-                    if ti < len(bv) and bv[ti] > 0.5 and tok in TOK2PAD and tok not in MENU_MASK:
-                        buttons[TOK2PAD[tok]] = 1.0
+            executed = [runtime_action(jl[i], jr[i], bt[i]) for i in range(min(exec_frames, len(jl)))]
+            append_action_log(log_path, {
+                "time": time.time(), "step": steps, "infer_ms": round(infers[-1], 1),
+                "raw": {"j_left": jl.tolist(), "j_right": jr.tolist(), "buttons": bt.tolist()},
+                "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
+                "right_stick_y_locked": True,
+            })
+            for axes, buttons in executed:
                 try:
                     s.post(base + "/pad", json={"axes": axes, "buttons": buttons}, timeout=20)
                     pads += 1
@@ -197,12 +220,15 @@ class NitroGen:
                     pass
                 time.sleep(pace_ms / 1000.0)
             steps += 1
+            if steps % 20 == 0:
+                action_logs.commit()
         try:
             s.post(base + "/pad", json={"axes": [0, 0, 0, 0], "buttons": [0.0] * 17}, timeout=20)
         except Exception:
             pass
         med = sorted(infers)[len(infers) // 2] if infers else 0
-        return {"steps": steps, "pad_frames": pads, "median_infer_ms": round(med, 1)}
+        action_logs.commit()
+        return {"steps": steps, "pad_frames": pads, "median_infer_ms": round(med, 1), "action_log": log_path}
 
     @modal.method()
     def play_browserbase(self, api_key: str, session_id: str, seconds: float = 30.0,
@@ -222,6 +248,8 @@ class NitroGen:
             raise RuntimeError(f"Browserbase session is not connectable: {session}")
 
         self.session.reset()
+        Path("/logs").mkdir(parents=True, exist_ok=True)
+        log_path = f"/logs/browserbase-{time.strftime('%Y%m%d-%H%M%S', time.gmtime())}.jsonl"
         infers, frame_waits, pads = [], [], 0
         with sync_playwright() as playwright:
             browser = playwright.chromium.connect_over_cdp(connect_url)
@@ -262,26 +290,30 @@ class NitroGen:
                     left = np.asarray(out["j_left"]).reshape(-1, 2)
                     right = np.asarray(out["j_right"]).reshape(-1, 2)
                     button_chunk = np.asarray(out["buttons"]).reshape(len(left), -1)
-                    for index in range(min(exec_frames, len(left))):
-                        axes = [float(left[index][0]), -float(left[index][1]),
-                                float(right[index][0]), -float(right[index][1])]
-                        buttons = [0.0] * 17
-                        for token_index, token in enumerate(BUTTON_TOKENS):
-                            if (token_index < len(button_chunk[index]) and button_chunk[index][token_index] > 0.5
-                                    and token in TOK2PAD and token not in {"START", "BACK", "GUIDE"}):
-                                buttons[TOK2PAD[token]] = 1.0
+                    executed = [runtime_action(left[index], right[index], button_chunk[index])
+                                for index in range(min(exec_frames, len(left)))]
+                    append_action_log(log_path, {
+                        "time": time.time(), "step": len(infers) - 1, "infer_ms": round(infers[-1], 1),
+                        "raw": {"j_left": left.tolist(), "j_right": right.tolist(), "buttons": button_chunk.tolist()},
+                        "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
+                        "right_stick_y_locked": True,
+                    })
+                    for axes, buttons in executed:
                         page.evaluate("([a,b]) => window.__gpSetState(a,b)", [axes, buttons])
                         pads += 1
                         page.wait_for_timeout(pace_ms)
+                    if len(infers) % 20 == 0:
+                        action_logs.commit()
             finally:
                 page.evaluate("window.__gpSetState([0,0,0,0], Array(17).fill(0))")
                 cdp.send("Page.stopScreencast")
                 browser.close()
+                action_logs.commit()
 
         median = lambda values: sorted(values)[len(values) // 2] if values else 0
         return {"pad_frames": pads, "inferences": len(infers),
                 "median_infer_ms": round(median(infers), 1),
-                "median_frame_wait_ms": round(median(frame_waits), 1)}
+                "median_frame_wait_ms": round(median(frame_waits), 1), "action_log": log_path}
 
     @modal.method()
     def smoke_test(self) -> dict:
