@@ -71,9 +71,11 @@ class Runtime:
         state_path = self.profile / "storage-state.json"
         previous_state = self.profile / "storage-state.previous.json"
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(
+            self.context = playwright.chromium.launch_persistent_context(
+                user_data_dir=str(self.profile / "chromium"),
                 headless=False,
                 executable_path=os.environ.get("CHROME_PATH") or None,
+                viewport={"width": self.capture_width, "height": self.capture_height},
                 args=[
                     "--no-sandbox", "--disable-dev-shm-usage",
                     "--disable-blink-features=AutomationControlled",
@@ -82,10 +84,6 @@ class Runtime:
                     "--autoplay-policy=no-user-gesture-required",
                     "--window-position=0,0", f"--window-size={self.width},{self.height}",
                 ],
-            )
-            self.context = browser.new_context(
-                viewport={"width": self.capture_width, "height": self.capture_height},
-                storage_state=str(state_path if state_path.exists() else previous_state) if (state_path.exists() or previous_state.exists()) else None,
             )
             self.context.grant_permissions(["camera", "microphone"], origin="https://play.geforcenow.com")
             self.context.add_init_script(GAMEPAD_INIT_JS)
@@ -105,7 +103,7 @@ class Runtime:
                     reply.put((False, str(error)))
             state_path.parent.mkdir(parents=True, exist_ok=True)
             self.context.storage_state(path=str(state_path), indexed_db=True)
-            browser.close()
+            self.context.close()
 
     def _prepare(self, page):
         try:
