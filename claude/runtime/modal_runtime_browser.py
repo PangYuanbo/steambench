@@ -46,6 +46,7 @@ def start(timeout: int):
     state = {
         "sandbox_id": sandbox.object_id,
         "api_url": tunnels[8765].url,
+        "watch_url": tunnels[8765].url + "/watch?token=" + api_token,
         "live_view_url": tunnels[6080].url + "/vnc.html?autoconnect=true&resize=scale",
         "api_token": api_token,
         "vnc_password": vnc_password,

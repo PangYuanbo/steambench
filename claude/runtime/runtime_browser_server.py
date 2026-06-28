@@ -251,6 +251,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def _authorized(self):
         supplied = self.headers.get("Authorization", "").removeprefix("Bearer ")
+        if not supplied:
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            supplied = query.get("token", [""])[0]
         return hmac.compare_digest(supplied, self.token)
 
     def _json(self, status: int, payload):
@@ -264,9 +267,42 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self._authorized():
             return self._json(401, {"error": "unauthorized"})
-        if self.path == "/health":
+        path = urllib.parse.urlsplit(self.path).path
+        if path == "/watch":
+            token = urllib.parse.quote(self.token, safe="")
+            body = f"""<!doctype html><html><head><meta name=viewport content="width=device-width,initial-scale=1">
+<title>SteamBench Live</title><style>html,body{{margin:0;width:100%;height:100%;background:#000;overflow:hidden}}img{{width:100%;height:100%;object-fit:contain}}</style></head>
+<body><img src="/mjpeg?token={token}" alt="SteamBench live stream"></body></html>""".encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            return self.wfile.write(body)
+        if path == "/mjpeg":
+            self.send_response(200)
+            self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            frame_id = -1
+            try:
+                while self.runtime.running:
+                    frame_id, body = self.runtime.jpeg(frame_id)
+                    if not body:
+                        continue
+                    self.wfile.write(
+                        b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: "
+                        + str(len(body)).encode() + b"\r\nX-Frame-Id: "
+                        + str(frame_id).encode() + b"\r\n\r\n" + body + b"\r\n"
+                    )
+                    self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            return
+        if path == "/health":
             return self._json(200, self.runtime.health())
-        if self.path.startswith("/frame"):
+        if path == "/frame":
             query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
             frame_id, body = self.runtime.jpeg(int(query.get("after", [-1])[0]))
             self.send_response(200)
@@ -275,7 +311,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             return self.wfile.write(body)
-        if self.path == "/tabs":
+        if path == "/tabs":
             return self._json(200, self.runtime.call("tabs"))
         self._json(404, {"error": "not found"})
 
