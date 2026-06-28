@@ -35,11 +35,13 @@ TOK2PAD = {
     'RIGHT_THUMB': 11, 'DPAD_UP': 12, 'DPAD_DOWN': 13, 'DPAD_LEFT': 14, 'DPAD_RIGHT': 15, 'GUIDE': 16,
 }
 MENU_MASK = {"START", "BACK", "GUIDE"}
+LOCK_CAMERA_PITCH = os.environ.get("LOCK_CAMERA_PITCH", "1") != "0"
 
 
 def runtime_action(left, right, button_values):
-    """Map one NitroGen action to W3C; lock camera pitch to the horizon."""
-    axes = [float(left[0]), -float(left[1]), float(right[0]), 0.0]
+    """Map one NitroGen action to W3C; optionally lock camera pitch."""
+    axes = [float(left[0]), -float(left[1]), float(right[0]),
+            0.0 if LOCK_CAMERA_PITCH else -float(right[1])]
     buttons = [0.0] * 17
     for index, token in enumerate(BUTTON_TOKENS):
         if index < len(button_values) and button_values[index] > 0.5 and token in TOK2PAD and token not in MENU_MASK:
@@ -111,7 +113,7 @@ image = (
 )
 
 
-@app.cls(gpu="RTX-PRO-6000", cloud="aws", region="us-west-2", image=image,
+@app.cls(gpu=os.environ.get("NITROGEN_GPU", "RTX-PRO-6000"), cloud="aws", region="us-west-2", image=image,
          volumes={"/cache/hf": hf_cache, "/logs": action_logs},
          timeout=3600, scaledown_window=300)
 class NitroGen:
@@ -210,7 +212,7 @@ class NitroGen:
                 "time": time.time(), "step": steps, "infer_ms": round(infers[-1], 1),
                 "raw": {"j_left": jl.tolist(), "j_right": jr.tolist(), "buttons": bt.tolist()},
                 "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
-                "right_stick_y_locked": True,
+                "right_stick_y_locked": LOCK_CAMERA_PITCH,
             })
             for axes, buttons in executed:
                 try:
@@ -296,7 +298,7 @@ class NitroGen:
                         "time": time.time(), "step": len(infers) - 1, "infer_ms": round(infers[-1], 1),
                         "raw": {"j_left": left.tolist(), "j_right": right.tolist(), "buttons": button_chunk.tolist()},
                         "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
-                        "right_stick_y_locked": True,
+                        "right_stick_y_locked": LOCK_CAMERA_PITCH,
                     })
                     for axes, buttons in executed:
                         page.evaluate("([a,b]) => window.__gpSetState(a,b)", [axes, buttons])
