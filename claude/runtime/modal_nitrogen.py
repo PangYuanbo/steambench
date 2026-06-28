@@ -37,8 +37,8 @@ TOK2PAD = {
 MENU_MASK = {"START", "BACK", "GUIDE"}
 def runtime_action(left, right, button_values, lock_camera_pitch=True):
     """Map one NitroGen action to W3C; optionally lock camera pitch."""
-    axes = [float(left[0]), -float(left[1]), float(right[0]),
-            0.0 if lock_camera_pitch else -float(right[1])]
+    axes = [float(left[0]), float(left[1]), float(right[0]),
+            0.0 if lock_camera_pitch else float(right[1])]
     buttons = [0.0] * 17
     for index, token in enumerate(BUTTON_TOKENS):
         if index < len(button_values) and button_values[index] > 0.5 and token in TOK2PAD and token not in MENU_MASK:
