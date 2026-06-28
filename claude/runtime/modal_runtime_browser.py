@@ -19,9 +19,11 @@ profile = modal.Volume.from_name("steambench-browser-profile", create_if_missing
 recordings = modal.Volume.from_name("steambench-browser-recordings", create_if_missing=True)
 image = (
     modal.Image.debian_slim(python_version="3.12")
-    .apt_install("ffmpeg", "xvfb", "openbox", "x11vnc", "novnc", "websockify", "chromium")
+    .apt_install("ffmpeg", "xvfb", "openbox", "x11vnc", "novnc", "websockify", "chromium", "gcc", "libc6-dev")
     .pip_install("playwright==1.60.0", "pillow", "mss")
     .run_commands("playwright install-deps chromium", "playwright install chromium")
+    .add_local_file(ROOT / "runtime/netlink_bind_shim.c", "/tmp/netlink_bind_shim.c", copy=True)
+    .run_commands("mkdir -p /app && gcc -shared -fPIC -ldl /tmp/netlink_bind_shim.c -o /app/netlink_bind_shim.so")
     .add_local_file(ROOT / "runtime/runtime_browser_server.py", "/app/runtime_browser_server.py")
 )
 
@@ -35,7 +37,7 @@ def start(timeout: int):
         "openbox >/tmp/openbox.log 2>&1 & "
         f"x11vnc -display :0 -forever -shared -passwd {vnc_password} -rfbport 5900 >/tmp/x11vnc.log 2>&1 & "
         "websockify --web=/usr/share/novnc 6080 localhost:5900 >/tmp/novnc.log 2>&1 & "
-        f"DISPLAY=:0 CHROME_PATH=/usr/bin/chromium PYTHONPATH=/app python /app/runtime_browser_server.py --profile /profile --token {api_token}",
+        f"DISPLAY=:0 CHROME_PATH=/usr/bin/chromium LD_PRELOAD=/app/netlink_bind_shim.so PYTHONPATH=/app python /app/runtime_browser_server.py --profile /profile --token {api_token}",
         app=app, image=image, cloud="aws", region="us-west-2",
         cpu=8, memory=16384, timeout=timeout, idle_timeout=timeout,
         encrypted_ports=[8765, 6080], volumes={"/profile": profile, "/recordings": recordings},
