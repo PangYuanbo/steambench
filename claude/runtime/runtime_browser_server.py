@@ -84,7 +84,7 @@ class Runtime:
                 ],
             )
             self.context = browser.new_context(
-                viewport={"width": self.width, "height": self.height},
+                viewport={"width": self.capture_width, "height": self.capture_height},
                 storage_state=str(state_path if state_path.exists() else previous_state) if (state_path.exists() or previous_state.exists()) else None,
             )
             self.context.grant_permissions(["camera", "microphone"], origin="https://play.geforcenow.com")
