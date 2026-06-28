@@ -35,13 +35,10 @@ TOK2PAD = {
     'RIGHT_THUMB': 11, 'DPAD_UP': 12, 'DPAD_DOWN': 13, 'DPAD_LEFT': 14, 'DPAD_RIGHT': 15, 'GUIDE': 16,
 }
 MENU_MASK = {"START", "BACK", "GUIDE"}
-LOCK_CAMERA_PITCH = os.environ.get("LOCK_CAMERA_PITCH", "1") != "0"
-
-
-def runtime_action(left, right, button_values):
+def runtime_action(left, right, button_values, lock_camera_pitch=True):
     """Map one NitroGen action to W3C; optionally lock camera pitch."""
     axes = [float(left[0]), -float(left[1]), float(right[0]),
-            0.0 if LOCK_CAMERA_PITCH else -float(right[1])]
+            0.0 if lock_camera_pitch else -float(right[1])]
     buttons = [0.0] * 17
     for index, token in enumerate(BUTTON_TOKENS):
         if index < len(button_values) and button_values[index] > 0.5 and token in TOK2PAD and token not in MENU_MASK:
@@ -176,7 +173,7 @@ class NitroGen:
 
     @modal.method()
     def play_runtime(self, daemon_url: str, seconds: float = 30.0, exec_frames: int = 6,
-                     pace_ms: int = 55, token: str = "") -> dict:
+                     pace_ms: int = 55, token: str = "", lock_camera_pitch: bool = True) -> dict:
         """The glue loop, run ON the GPU container (predict is a local call =
         no inter-function hop): GET /frame from the E2B daemon -> NitroGen
         predict -> map the action chunk to /pad -> POST. Receding horizon:
@@ -207,12 +204,12 @@ class NitroGen:
             jl = np.asarray(out["j_left"]).reshape(-1, 2)
             jr = np.asarray(out["j_right"]).reshape(-1, 2)
             bt = np.asarray(out["buttons"]).reshape(len(jl), -1)
-            executed = [runtime_action(jl[i], jr[i], bt[i]) for i in range(min(exec_frames, len(jl)))]
+            executed = [runtime_action(jl[i], jr[i], bt[i], lock_camera_pitch) for i in range(min(exec_frames, len(jl)))]
             append_action_log(log_path, {
                 "time": time.time(), "step": steps, "infer_ms": round(infers[-1], 1),
                 "raw": {"j_left": jl.tolist(), "j_right": jr.tolist(), "buttons": bt.tolist()},
                 "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
-                "right_stick_y_locked": LOCK_CAMERA_PITCH,
+                "right_stick_y_locked": lock_camera_pitch,
             })
             for axes, buttons in executed:
                 try:
@@ -292,13 +289,13 @@ class NitroGen:
                     left = np.asarray(out["j_left"]).reshape(-1, 2)
                     right = np.asarray(out["j_right"]).reshape(-1, 2)
                     button_chunk = np.asarray(out["buttons"]).reshape(len(left), -1)
-                    executed = [runtime_action(left[index], right[index], button_chunk[index])
+                    executed = [runtime_action(left[index], right[index], button_chunk[index], True)
                                 for index in range(min(exec_frames, len(left)))]
                     append_action_log(log_path, {
                         "time": time.time(), "step": len(infers) - 1, "infer_ms": round(infers[-1], 1),
                         "raw": {"j_left": left.tolist(), "j_right": right.tolist(), "buttons": button_chunk.tolist()},
                         "executed": [{"axes": axes, "buttons": buttons} for axes, buttons in executed],
-                        "right_stick_y_locked": LOCK_CAMERA_PITCH,
+                        "right_stick_y_locked": True,
                     })
                     for axes, buttons in executed:
                         page.evaluate("([a,b]) => window.__gpSetState(a,b)", [axes, buttons])
@@ -356,7 +353,8 @@ def main():
         token = os.environ.get("RUNTIME_BROWSER_TOKEN", "")
         print(f"NitroGen playing via {daemon} for {secs}s (exec_frames={ef})...")
         t = time.time()
-        r = ng.play_runtime.remote(daemon, secs, ef, 55, token)
+        lock_pitch = os.environ.get("LOCK_CAMERA_PITCH", "1") != "0"
+        r = ng.play_runtime.remote(daemon, secs, ef, 55, token, lock_pitch)
         print(f"done in {time.time()-t:.0f}s: {r}")
         return
     games = ng.list_games.remote()
