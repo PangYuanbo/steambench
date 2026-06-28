@@ -17,7 +17,7 @@ import time
 
 import modal
 
-app = modal.App("nitrogen")
+app = modal.App(os.environ.get("NITROGEN_APP", "nitrogen-pro6000"))
 
 # NitroGen's 21-button output order (nitrogen/shared.py BUTTON_ACTION_TOKENS)
 BUTTON_TOKENS = [
@@ -151,8 +151,8 @@ class NitroGen:
         return {"ok": True}
 
     @modal.method()
-    def play(self, daemon_url: str, seconds: float = 30.0, exec_frames: int = 6,
-             pace_ms: int = 55, token: str = "") -> dict:
+    def play_runtime(self, daemon_url: str, seconds: float = 30.0, exec_frames: int = 6,
+                     pace_ms: int = 55, token: str = "") -> dict:
         """The glue loop, run ON the GPU container (predict is a local call =
         no inter-function hop): GET /frame from the E2B daemon -> NitroGen
         predict -> map the action chunk to /pad -> POST. Receding horizon:
@@ -322,7 +322,7 @@ def main():
         token = os.environ.get("RUNTIME_BROWSER_TOKEN", "")
         print(f"NitroGen playing via {daemon} for {secs}s (exec_frames={ef})...")
         t = time.time()
-        r = ng.play.remote(daemon, secs, ef, 55, token)
+        r = ng.play_runtime.remote(daemon, secs, ef, 55, token)
         print(f"done in {time.time()-t:.0f}s: {r}")
         return
     games = ng.list_games.remote()
