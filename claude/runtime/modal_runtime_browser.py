@@ -33,11 +33,11 @@ def start(timeout: int):
     vnc_password = secrets.token_urlsafe(12)
     sandbox = modal.Sandbox.create(
         "bash", "-lc",
-        "Xvfb :0 -screen 0 1280x720x24 -nolisten tcp & "
+        "Xvfb :0 -screen 0 1280x805x24 -nolisten tcp & "
         "openbox >/tmp/openbox.log 2>&1 & "
         f"x11vnc -display :0 -forever -shared -passwd {vnc_password} -rfbport 5900 >/tmp/x11vnc.log 2>&1 & "
         "websockify --web=/usr/share/novnc 6080 localhost:5900 >/tmp/novnc.log 2>&1 & "
-        f"DISPLAY=:0 CHROME_PATH=/usr/bin/chromium LD_PRELOAD=/app/netlink_bind_shim.so PYTHONPATH=/app python /app/runtime_browser_server.py --profile /profile --token {api_token}",
+        f"DISPLAY=:0 CHROME_PATH=/usr/bin/chromium LD_PRELOAD=/app/netlink_bind_shim.so PYTHONPATH=/app python /app/runtime_browser_server.py --profile /profile --token {api_token} --width 1280 --height 805 --capture-top 85 --capture-width 1280 --capture-height 720",
         app=app, image=image, cloud="aws", region="us-west-2",
         cpu=8, memory=16384, timeout=timeout, idle_timeout=timeout,
         encrypted_ports=[8765, 6080], volumes={"/profile": profile, "/recordings": recordings},

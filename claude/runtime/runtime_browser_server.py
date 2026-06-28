@@ -43,9 +43,14 @@ GAMEPAD_INIT_JS = r"""
 
 
 class Runtime:
-    def __init__(self, profile: str, width: int, height: int, capture_hz: int, record_hz: int):
+    def __init__(self, profile: str, width: int, height: int, capture_hz: int, record_hz: int,
+                 capture_left: int = 0, capture_top: int = 0,
+                 capture_width: int | None = None, capture_height: int | None = None):
         self.profile = Path(profile)
         self.width, self.height = width, height
+        self.capture_left, self.capture_top = capture_left, capture_top
+        self.capture_width = capture_width or width
+        self.capture_height = capture_height or height
         self.capture_hz, self.record_hz = capture_hz, record_hz
         self.commands: queue.Queue = queue.Queue()
         self.latest: bytes | None = None
@@ -173,7 +178,10 @@ class Runtime:
         import mss
 
         period = 1 / self.capture_hz
-        monitor = {"left": 0, "top": 0, "width": self.width, "height": self.height}
+        monitor = {
+            "left": self.capture_left, "top": self.capture_top,
+            "width": self.capture_width, "height": self.capture_height,
+        }
         next_frame = time.monotonic()
         with mss.mss() as capture:
             while self.running:
@@ -206,7 +214,7 @@ class Runtime:
         if raw is None:
             return frame_id, b""
         output = io.BytesIO()
-        Image.frombytes("RGB", (self.width, self.height), raw).save(output, "JPEG", quality=70)
+        Image.frombytes("RGB", (self.capture_width, self.capture_height), raw).save(output, "JPEG", quality=70)
         return frame_id, output.getvalue()
 
     def start_recording(self, path: str):
@@ -217,7 +225,7 @@ class Runtime:
         self.recorded_frames = 0
         self.record = subprocess.Popen([
             "ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
-            "-s", f"{self.width}x{self.height}", "-r", str(self.record_hz), "-i", "-", "-an",
+            "-s", f"{self.capture_width}x{self.capture_height}", "-r", str(self.record_hz), "-i", "-", "-an",
             "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p",
             "-movflags", "+faststart", path,
         ], stdin=subprocess.PIPE)
@@ -239,6 +247,7 @@ class Runtime:
             "ok": self.running,
             "capture_hz": round((len(recent) - 1) / span, 2) if span else 0,
             "capture_target_hz": self.capture_hz,
+            "capture_region": [self.capture_left, self.capture_top, self.capture_width, self.capture_height],
             "record_target_hz": self.record_hz,
             "recording": bool(self.record),
             "recorded_frames": self.recorded_frames,
@@ -344,9 +353,16 @@ def main():
     parser.add_argument("--height", type=int, default=720)
     parser.add_argument("--capture-hz", type=int, default=60)
     parser.add_argument("--record-hz", type=int, default=30)
+    parser.add_argument("--capture-left", type=int, default=0)
+    parser.add_argument("--capture-top", type=int, default=0)
+    parser.add_argument("--capture-width", type=int)
+    parser.add_argument("--capture-height", type=int)
     parser.add_argument("--token", required=True)
     args = parser.parse_args()
-    runtime = Runtime(args.profile, args.width, args.height, args.capture_hz, args.record_hz)
+    runtime = Runtime(
+        args.profile, args.width, args.height, args.capture_hz, args.record_hz,
+        args.capture_left, args.capture_top, args.capture_width, args.capture_height,
+    )
     Handler.runtime = runtime
     Handler.token = args.token
     ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
